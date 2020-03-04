@@ -1,35 +1,4 @@
 <!--
-# rss-reader
-
-## Project setup
-```
-npm install
-```
-
-### Compiles and hot-reloads for development
-```
-npm run serve
-```
-
-### Compiles and minifies for production
-```
-npm run build
-```
-
-### Lints and fixes files
-```
-npm run lint
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
--->
-## How to install
-```
-npm install
-npm run electron:build
-```
-
 ## 実行
 ```
 npm run electron:serve
@@ -39,3 +8,19 @@ npm run electron:serve
 ```
 npm run electron:build
 ```
+-->
+## How to install
+```
+npm install
+npm run electron:build
+```
+
+## 今後追加したい機能
+- 定期的に更新する(feedを取ってくる)
+- watch laterをlocalstorageに保存する
+- 新着のfeedを色を付けて表示
+- デスクトップ通知機能
+- すべてのfeedを時系列順で並べるページ
+- アプリアイコン作成
+- 起動語のページの設定
+- 任意のfeedを追加する機能
