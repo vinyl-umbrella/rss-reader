@@ -44,6 +44,7 @@ export default {
     created: function() {
         this.getAll();
         console.log("started");
+        setInterval(this.getAll, 300000);
     },
 
     data(){
