@@ -48,11 +48,15 @@ export default {
 
     data(){
         return {
-            feed: {},
+            // すべてのfeedをjson形式で格納
             allFeed: {},
+            // 各ページのfeed
+            feed: {},
+            // watch later のリスト
             later: {
                 "items": []
             },
+            // ボタンのテキスト
             add_remove: "watch later",
         }
     },
@@ -111,9 +115,9 @@ export default {
             for(let loop = 0; loop < nicoList.length; loop++){
                 (async () => {
                     //パース
-                    let bbb = await nicoParser.parseURL(nicoList[loop][1]);
+                    let parsed = await nicoParser.parseURL(nicoList[loop][1]);
                     //追加
-                    self.allFeed[nicoList[loop][0]] = bbb;
+                    self.allFeed[nicoList[loop][0]] = parsed;
                 })();
             }
 
@@ -125,14 +129,15 @@ export default {
             for(let loop = 0; loop < tubeList.length; loop++){
                 (async () => {
                     //パース
-                    let bbb = await tubeParser.parseURL(tubeList[loop][1]);
+                    let parsed = await tubeParser.parseURL(tubeList[loop][1]);
                     //追加
-                    self.allFeed[tubeList[loop][0]] = bbb;
+                    self.allFeed[tubeList[loop][0]] = parsed;
                 })();
             }
             //取得後に初期ページを設定したい
-            //self.eachFeed('jun');
+
             console.log('loaded');
+            setTimeout(self.eachFeed, 1000, 'jun');
         },
 
 
