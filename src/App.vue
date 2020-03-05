@@ -44,6 +44,9 @@ export default {
     created: function() {
         this.getAll();
         console.log("started");
+        if (localStorage.getItem('watch_later_list')) {
+            this.later = JSON.parse(localStorage.getItem('watch_later_list'));
+        }
         setInterval(this.getAll, 300000);
     },
 
@@ -180,15 +183,17 @@ export default {
                         notExist = false;
                     }
                 }
-                //存在しないなら追加
+                //存在しないなら追加，localStorageにも変更を反映
                 if (notExist){
                     self.later.items.push(list);
+                    localStorage.setItem('watch_later_list', JSON.stringify(self.later));
                 }
             } else {
-                //laterから削除
+                //laterから削除，localStorageにも変更を反映
                 for(let i=0; i<self.later.items.length; i++){
                     if (self.later.items[i] === list) {
-                        self.later.items.splice(i, 1)
+                        self.later.items.splice(i, 1);
+                        localStorage.setItem('watch_later_list', JSON.stringify(self.later));
                     }
                 }
             }

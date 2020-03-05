@@ -16,7 +16,6 @@ npm run electron:build
 ```
 
 ## 今後追加したい機能
-- watch laterをlocalstorageに保存する
 - 新着のfeedを色を付けて表示
 - デスクトップ通知機能
 - すべてのfeedを時系列順で並べるページ
