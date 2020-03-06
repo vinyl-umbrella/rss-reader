@@ -2,13 +2,21 @@
     <div id="app">
         <div class="body">
 
+            <h1 class="pageTitle">{{ pageTitle }}</h1>
             <article v-for="(list, index) in feed.items" :key="index">
                 <figure>
                     <img :src="list.thumbnail" />
                 </figure>
                 <div class="text_content">
                     <p class="date">{{ list.date }}</p>
-                    <h2><a @click="openPage(list.link)">{{ list.title }}</a></h2>
+                    <h2><a @click="openPage(list.link)">
+                        <font color="#2cb4ad" v-if="NewFeedindex>index">
+                            {{ list.title }}
+                        </font>
+                        <font v-else>
+                            {{ list.title }}
+                        </font>
+                    </a></h2>
                     <p class = "description">{{ list.description }}</p>
                     <a href="javascript:void(0)" class="btn" @click="add_watch_later(add_remove, list); return false;">{{ add_remove }}</a>
                 </div>
@@ -22,15 +30,15 @@
                 <li><a href="#" class="btn" @click="getAll">reload all</a></li>
                 <li><a href="#" class="btn" @click="show_watch_later">watch later</a></li>
                 <br />
-                <li><a href="#" class="btn" @click="eachFeed('jun')">jun channel</a></li>
-                <li><a href="#" class="btn" @click="eachFeed('UNK')">UNKちゃんねる</a></li>
-                <li><a href="#" class="btn" @click="eachFeed('kirinuki')">切り抜き</a></li>
-                <li><a href="#" class="btn" @click="eachFeed('kirinuki2')">切り抜き2</a></li>
-                <li><a href="#" class="btn" @click="eachFeed('pizza')">ピザラジ</a></li>
+                <li><a href="#" class="btn" @click="eachFeed('jun', 'jun channel')">jun channel</a></li>
+                <li><a href="#" class="btn" @click="eachFeed('UNK', 'UNKちゃんねる')">UNKちゃんねる</a></li>
+                <li><a href="#" class="btn" @click="eachFeed('kirinuki', '切り抜き')">切り抜き</a></li>
+                <li><a href="#" class="btn" @click="eachFeed('kirinuki2', '切り抜き2')">切り抜き2</a></li>
+                <li><a href="#" class="btn" @click="eachFeed('pizza', 'ピザラジ')">ピザラジ</a></li>
                 <br />
-                <li><a href="#" class="btn" @click="eachFeed('kiyo')">キヨ</a></li>
-                <li><a href="#" class="btn" @click="eachFeed('ushizawa')">牛沢</a></li>
-                <li><a href="#" class="btn" @click="eachFeed('mokou')">もこう</a></li>
+                <li><a href="#" class="btn" @click="eachFeed('kiyo', 'キヨ')">キヨ</a></li>
+                <li><a href="#" class="btn" @click="eachFeed('ushizawa', '牛沢')">牛沢</a></li>
+                <li><a href="#" class="btn" @click="eachFeed('mokou', 'もこう')">もこう</a></li>
             </ul>
         </div>
 
@@ -42,11 +50,17 @@ const { shell } = require('electron');
 
 export default {
     created: function() {
-        this.getAll();
-        console.log("started");
+        // localStorageに watch_later_list が存在すれば取ってくる
         if (localStorage.getItem('watch_later_list')) {
             this.later = JSON.parse(localStorage.getItem('watch_later_list'));
         }
+        // localStorageに newestList が存在すれば取ってくる
+        if (localStorage.getItem('newestList')) {
+            this.newest = JSON.parse(localStorage.getItem('newestList'));
+        }
+
+        this.getAll();
+        // 5分ごとにfeedを更新
         setInterval(this.getAll, 300000);
     },
 
@@ -58,18 +72,23 @@ export default {
             feed: {},
             // watch later のリスト
             later: {
-                "items": []
+                "items": [],
             },
+            newest: {},
             // ボタンのテキスト
             add_remove: "watch later",
+            pageTitle: "",
+            NewFeedindex: "",
         }
     },
     methods: {
         getdoubleDigestNumer(number) {
+            // 1桁の数を "0+n" にする
             return ("0" + number).slice(-2)
         },
 
         setDate(iso, channel, loop) {
+            // isoDateから表示形式を変更
             let self = this;
             let D = new Date(iso);
             let month = self.getdoubleDigestNumer(D.getMonth() + 1);
@@ -83,6 +102,7 @@ export default {
         },
 
         setDescription(channel, loop) {
+            // tubeのみ
             let self = this;
             let desc = self.allFeed[channel].items[loop]["media:group"]["media:description"][0];
             if (desc.length > 100){
@@ -122,6 +142,24 @@ export default {
                     let parsed = await nicoParser.parseURL(nicoList[loop][1]);
                     //追加
                     self.allFeed[nicoList[loop][0]] = parsed;
+
+                    // 日付・description・thumbnail 整える
+                    for(let j = 0; j < self.allFeed[nicoList[loop][0]].items.length; j++) {
+                        //日付表示を整える
+                        self.setDate(self.allFeed[nicoList[loop][0]].items[j].isoDate, nicoList[loop][0], j);
+                        //description追加
+                        if (!("description" in self.allFeed[nicoList[loop][0]].items[j])) {
+                            self.setDescription(nicoList[loop][0], j);
+                        }
+                        //thumbnail追加 nicoとtubeで場合分け
+                        if (!("thumbnail" in self.allFeed[nicoList[loop][0]].items[j])) {
+                            if ("nicoch:live_thumbnail" in self.allFeed[nicoList[loop][0]].items[j]) {
+                                self.allFeed[nicoList[loop][0]].items[j]["thumbnail"] = self.allFeed[nicoList[loop][0]].items[j]["nicoch:live_thumbnail"];
+                            } else {
+                                self.allFeed[nicoList[loop][0]].items[j]["thumbnail"] = self.allFeed[nicoList[loop][0]].items[j]["media:group"]["media:thumbnail"][0]["$"]["url"];
+                            }
+                        }
+                    }
                 })();
             }
 
@@ -136,35 +174,54 @@ export default {
                     let parsed = await tubeParser.parseURL(tubeList[loop][1]);
                     //追加
                     self.allFeed[tubeList[loop][0]] = parsed;
+
+                    // 日付・description・thumbnail 整える
+                    for(let j = 0; j < self.allFeed[tubeList[loop][0]].items.length; j++) {
+                        //日付表示を整える
+                        self.setDate(self.allFeed[tubeList[loop][0]].items[j].isoDate, tubeList[loop][0], j);
+                        //description追加
+                        if (!("description" in self.allFeed[tubeList[loop][0]].items[j])) {
+                            self.setDescription(tubeList[loop][0], j);
+                        }
+                        //thumbnail追加 nicoとtubeで場合分け
+                        if (!("thumbnail" in self.allFeed[tubeList[loop][0]].items[j])) {
+                            if ("nicoch:live_thumbnail" in self.allFeed[tubeList[loop][0]].items[j]) {
+                                self.allFeed[tubeList[loop][0]].items[j]["thumbnail"] = self.allFeed[tubeList[loop][0]].items[j]["nicoch:live_thumbnail"];
+                            } else {
+                                self.allFeed[tubeList[loop][0]].items[j]["thumbnail"] = self.allFeed[tubeList[loop][0]].items[j]["media:group"]["media:thumbnail"][0]["$"]["url"];
+                            }
+                        }
+                    }
                 })();
             }
-            //取得後に初期ページを設定したい
 
             console.log('loaded');
-            setTimeout(self.eachFeed, 1000, 'jun');
+            setTimeout(self.eachFeed, 1000, 'jun', 'jun channel');
         },
 
 
-        eachFeed(channel) {
+        eachFeed(channel, channelNickname) {
             let self = this;
-            for(let loop = 0; loop < self.allFeed[channel].items.length; loop++){
-                //日付表示を整える
-                self.setDate(self.allFeed[channel].items[loop].isoDate, channel, loop);
-                //description追加
-                if (!("description" in self.allFeed[channel].items[loop])){
-                    self.setDescription(channel, loop);
+            let newFeedindex = 0;
+
+            for (;newFeedindex < self.allFeed[channel].items.length; newFeedindex++){
+                // localStorageにそのチャンネルが存在しない
+                if (!(self.newest[channel])) {
+                    continue;
                 }
-                //thumbnail追加 nicoとtubeで場合分け
-                if (!("thumbnail" in self.allFeed[channel].items[loop])){
-                    if ("nicoch:live_thumbnail" in self.allFeed[channel].items[loop]){
-                        self.allFeed[channel].items[loop]["thumbnail"] = self.allFeed[channel].items[loop]["nicoch:live_thumbnail"];
-                    } else {
-                        self.allFeed[channel].items[loop]["thumbnail"] = self.allFeed[channel].items[loop]["media:group"]["media:thumbnail"][0]["$"]["url"];
-                    }
+                // 新着feed検知
+                if (self.newest[channel].date === self.allFeed[channel].items[newFeedindex].date){
+                    break;
                 }
             }
+            self.NewFeedindex = newFeedindex;
+            // newestを更新，localStorageにも変更を反映
+            self.newest[channel] = self.allFeed[channel].items[0];
+            localStorage.setItem('newestList', JSON.stringify(self.newest));
+
             self.feed = this.allFeed[channel];
-            self.add_remove = "watch later"
+            self.pageTitle = channelNickname;
+            self.add_remove = "watch later";
         },
 
         //リンクをブラウザで開く
@@ -203,6 +260,7 @@ export default {
             let self = this;
             self.add_remove = "remove";
             self.feed = this.later;
+            self.pageTitle = "watch later"
         }
     }
 }
@@ -214,7 +272,7 @@ export default {
         list-style: none;
         padding-left: 15px;
     }
-    li {
+    ul li {
         padding-top: 5px;
     }
 
@@ -248,6 +306,7 @@ export default {
         left: 0;
         background-color: #333;
         color: #ccc;
+        border-right: solid 1px #777;
     }
 
     .body {
@@ -255,6 +314,16 @@ export default {
         margin-left: 200px;
         margin-right: 2px;
         background-color: #555;
+    }
+
+    .pageTitle {
+        text-align: center;
+        color: #ddd;
+        background: #333;
+        padding: 0.4em;
+        border-top: solid 3px black;
+        border-bottom: solid 3px black;
+        border-radius: 5px;
     }
 
     .text_content {
@@ -268,6 +337,7 @@ export default {
         background: #555;
         color: #FFF;
         border-bottom: solid 4px #444;
+        border-radius: 2px;
     }
     .btn:active {
         background: #444;
