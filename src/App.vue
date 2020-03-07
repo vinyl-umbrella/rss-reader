@@ -74,10 +74,12 @@ export default {
             later: {
                 "items": [],
             },
+            // それぞれのチャンネルの最新のfeedのリスト
             newest: {},
             // ボタンのテキスト
             add_remove: "watch later",
             pageTitle: "",
+            // 何番目のfeedが最新か示す値
             NewFeedindex: "",
         }
     },
@@ -196,28 +198,43 @@ export default {
             }
 
             console.log('loaded');
-            setTimeout(self.eachFeed, 1000, 'jun', 'jun channel');
+            setTimeout(self.eachFeed, 1000, 'default', 'default');
         },
 
 
         eachFeed(channel, channelNickname) {
             let self = this;
             let newFeedindex = 0;
+            if (channel === 'default') {
+                channel = 'jun';
+                channelNickname = 'jun channel';
+                for (;newFeedindex < self.allFeed[channel].items.length; newFeedindex++){
+                    if (!(self.newest[channel])) {
+                        continue;
+                    }
+                    // 新着feed検知
+                    if (self.newest[channel].date === self.allFeed[channel].items[newFeedindex].date){
+                        break;
+                    }
+                }
+                self.NewFeedindex = newFeedindex;
 
-            for (;newFeedindex < self.allFeed[channel].items.length; newFeedindex++){
-                // localStorageにそのチャンネルが存在しない
-                if (!(self.newest[channel])) {
-                    continue;
+            } else {
+                for (;newFeedindex < self.allFeed[channel].items.length; newFeedindex++){
+                    // localStorageにそのチャンネルが存在しない
+                    if (!(self.newest[channel])) {
+                        continue;
+                    }
+                    // 新着feed検知
+                    if (self.newest[channel].date === self.allFeed[channel].items[newFeedindex].date){
+                        break;
+                    }
                 }
-                // 新着feed検知
-                if (self.newest[channel].date === self.allFeed[channel].items[newFeedindex].date){
-                    break;
-                }
+                self.NewFeedindex = newFeedindex;
+                // newestを更新，localStorageにも変更を反映
+                self.newest[channel] = self.allFeed[channel].items[0];
+                localStorage.setItem('newestList', JSON.stringify(self.newest));
             }
-            self.NewFeedindex = newFeedindex;
-            // newestを更新，localStorageにも変更を反映
-            self.newest[channel] = self.allFeed[channel].items[0];
-            localStorage.setItem('newestList', JSON.stringify(self.newest));
 
             self.feed = this.allFeed[channel];
             self.pageTitle = channelNickname;
