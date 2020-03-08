@@ -27,18 +27,78 @@
 
         <div class="sidebar">
             <ul>
-                <li><a href="#" class="btn" @click="getAll">reload all</a></li>
-                <li><a href="#" class="btn" @click="show_watch_later">watch later</a></li>
+                <li><a href="#" class="btn" @click="getAll">
+                    reload all
+                </a></li>
+                <li><a href="#" class="btn" @click="show_watch_later">
+                    watch later
+                </a></li>
                 <br />
-                <li><a href="#" class="btn" @click="eachFeed('jun', 'jun channel')">jun channel</a></li>
-                <li><a href="#" class="btn" @click="eachFeed('UNK', 'UNKちゃんねる')">UNKちゃんねる</a></li>
-                <li><a href="#" class="btn" @click="eachFeed('kirinuki', '切り抜き')">切り抜き</a></li>
-                <li><a href="#" class="btn" @click="eachFeed('kirinuki2', '切り抜き2')">切り抜き2</a></li>
-                <li><a href="#" class="btn" @click="eachFeed('pizza', 'ピザラジ')">ピザラジ</a></li>
+                <li><a href="#" class="btn" @click="eachFeed('jun', 'jun channel')">
+                    <font color="#2cb4ad" v-if="channelColorFlag['jun'] === 1">
+                        jun channel
+                    </font>
+                    <font v-else>
+                        jun channel
+                    </font>
+                </a></li>
+                <li><a href="#" class="btn" @click="eachFeed('UNK', 'UNKちゃんねる')">
+                    <font color="#2cb4ad" v-if="channelColorFlag['UNK'] === 1">
+                        UNKちゃんねる
+                    </font>
+                    <font v-else>
+                        UNKちゃんねる
+                    </font>
+                </a></li>
+                <li><a href="#" class="btn" @click="eachFeed('kirinuki', '切り抜き')">
+                    <font color="#2cb4ad" v-if="channelColorFlag['kirinuki'] === 1">
+                        切り抜き
+                    </font>
+                    <font v-else>
+                        切り抜き
+                    </font>
+                </a></li>
+                <li><a href="#" class="btn" @click="eachFeed('kirinuki2', '切り抜き2')">
+                    <font color="#2cb4ad" v-if="channelColorFlag['kirinuki2'] === 1">
+                        切り抜き2
+                    </font>
+                    <font v-else>
+                        切り抜き2
+                    </font>
+                </a></li>
+                <li><a href="#" class="btn" @click="eachFeed('pizza', 'ピザラジ')">
+                    <font color="#2cb4ad" v-if="channelColorFlag['pizza'] === 1">
+                        ピザラジ
+                    </font>
+                    <font v-else>
+                        ピザラジ
+                    </font>
+                </a></li>
                 <br />
-                <li><a href="#" class="btn" @click="eachFeed('kiyo', 'キヨ')">キヨ</a></li>
-                <li><a href="#" class="btn" @click="eachFeed('ushizawa', '牛沢')">牛沢</a></li>
-                <li><a href="#" class="btn" @click="eachFeed('mokou', 'もこう')">もこう</a></li>
+                <li><a href="#" class="btn" @click="eachFeed('kiyo', 'キヨ')">
+                    <font color="#2cb4ad" v-if="channelColorFlag['kiyo'] === 1">
+                        キヨ
+                    </font>
+                    <font v-else>
+                        キヨ
+                    </font>
+                </a></li>
+                <li><a href="#" class="btn" @click="eachFeed('ushizawa', '牛沢')">
+                    <font color="#2cb4ad" v-if="channelColorFlag['ushizawa'] === 1">
+                        牛沢
+                    </font>
+                    <font v-else>
+                        牛沢
+                    </font>
+                </a></li>
+                <li><a href="#" class="btn" @click="eachFeed('mokou', 'もこう')">
+                    <font color="#2cb4ad" v-if="channelColorFlag['mokou'] === 1">
+                        もこう
+                    </font>
+                    <font v-else>
+                        もこう
+                    </font>
+                </a></li>
             </ul>
         </div>
 
@@ -81,6 +141,7 @@ export default {
             pageTitle: "",
             // 何番目のfeedが最新か示す値
             NewFeedindex: "",
+            channelColorFlag: {},
         }
     },
     methods: {
@@ -111,6 +172,17 @@ export default {
                 desc = desc.substr(0, 100) + "...";
             }
             self.allFeed[channel].items[loop]["description"] = desc;
+        },
+
+        detectNew(channel) {
+            let self = this;
+            if (!(self.newest[channel])) {
+                console.log('none');
+            }else if (self.newest[channel].date === self.allFeed[channel].items[0].date){
+                self.channelColorFlag[channel] = 0;
+            } else {
+                self.channelColorFlag[channel] = 1;
+            }
         },
 
         getAll() {
@@ -162,6 +234,7 @@ export default {
                             }
                         }
                     }
+                    self.detectNew(nicoList[loop][0]);
                 })();
             }
 
@@ -194,11 +267,12 @@ export default {
                             }
                         }
                     }
+                    self.detectNew(tubeList[loop][0]);
                 })();
             }
 
             console.log('loaded');
-            setTimeout(self.eachFeed, 1000, 'default', 'default');
+            setTimeout(self.eachFeed, 1500, 'default', 'default');
         },
 
 
@@ -229,6 +303,9 @@ export default {
                     if (self.newest[channel].date === self.allFeed[channel].items[newFeedindex].date){
                         break;
                     }
+                }
+                if (newFeedindex === 1) {
+                    self.channelColorFlag[channel] = 1;
                 }
                 self.NewFeedindex = newFeedindex;
                 // newestを更新，localStorageにも変更を反映
