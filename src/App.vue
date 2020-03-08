@@ -304,8 +304,8 @@ export default {
                         break;
                     }
                 }
-                if (newFeedindex === 1) {
-                    self.channelColorFlag[channel] = 1;
+                if (newFeedindex === 0) {
+                    self.channelColorFlag[channel] = 0;
                 }
                 self.NewFeedindex = newFeedindex;
                 // newestを更新，localStorageにも変更を反映
