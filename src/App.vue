@@ -74,6 +74,15 @@
                         ピザラジ
                     </font>
                 </a></li>
+                <li><a href="#" class="btn" @click="eachFeed('hokanko', '録画保管庫')">
+                    <font color="#2cb4ad" v-if="channelColorFlag['pizza'] === 1">
+                        録画保管庫
+                    </font>
+                    <font v-else>
+                        録画保管庫
+                    </font>
+                </a></li>
+
                 <br />
                 <li><a href="#" class="btn" @click="eachFeed('kiyo', 'キヨ')">
                     <font color="#2cb4ad" v-if="channelColorFlag['kiyo'] === 1">
@@ -199,6 +208,7 @@ export default {
                 ["kirinuki", "https://www.youtube.com/feeds/videos.xml?channel_id=UCH-lygWpHodDff3iQurnWnQ"],
                 ["kirinuki2", "https://www.youtube.com/feeds/videos.xml?channel_id=UCddGctO9eY4-lKIwDj42p0Q"],
                 ["pizza", "https://www.youtube.com/feeds/videos.xml?channel_id=UCeWZN7rNRQaHCtMCdHEZFqw"],
+                ["hokanko", "https://www.youtube.com/feeds/videos.xml?channel_id=UC4vLrf83XQ9zpGx6XqDgk3g"],
                 ["mokou", "https://www.youtube.com/feeds/videos.xml?channel_id=UCENoC6MLc4pL-vehJyzSWmg"],
                 ["kiyo", "https://www.youtube.com/feeds/videos.xml?channel_id=UCMJiPpN_09F0aWpQrgbc_qg"],
                 ["ushizawa", "https://www.youtube.com/feeds/videos.xml?channel_id=UCZMRuagdTBKmmrFtSMN48Xw"],
