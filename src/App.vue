@@ -1,7 +1,92 @@
 <template>
     <div id="app">
-        <div class="body">
+        <div class="sidebar">
+            <ul>
+                <li><a href="#" class="btn" @click="getAll">
+                    reload all
+                </a></li>
+                <li><a href="#" class="btn" @click="show_watch_later">
+                    watch later
+                </a></li>
+                <br />
+                <li><a href="#" class="btn" @click="eachFeed('jun')">
+                    <font color="#00aaaa" v-if="channelColorFlag['jun'] === 1">
+                        jun channel
+                    </font>
+                    <font v-else>
+                        jun channel
+                    </font>
+                </a></li>
+                <li><a href="#" class="btn" @click="eachFeed('UNK')">
+                    <font color="#00aaaa" v-if="channelColorFlag['UNK'] === 1">
+                        UNKちゃんねる
+                    </font>
+                    <font v-else>
+                        UNKちゃんねる
+                    </font>
+                </a></li>
+                <li><a href="#" class="btn" @click="eachFeed('kirinuki')">
+                    <font color="#00aaaa" v-if="channelColorFlag['kirinuki'] === 1">
+                        切り抜き
+                    </font>
+                    <font v-else>
+                        切り抜き
+                    </font>
+                </a></li>
+                <li><a href="#" class="btn" @click="eachFeed('kirinuki2')">
+                    <font color="#00aaaa" v-if="channelColorFlag['kirinuki2'] === 1">
+                        切り抜き2
+                    </font>
+                    <font v-else>
+                        切り抜き2
+                    </font>
+                </a></li>
+                <li><a href="#" class="btn" @click="eachFeed('pizza')">
+                    <font color="#00aaaa" v-if="channelColorFlag['pizza'] === 1">
+                        ピザラジ
+                    </font>
+                    <font v-else>
+                        ピザラジ
+                    </font>
+                </a></li>
+                <li><a href="#" class="btn" @click="eachFeed('hokanko')">
+                    <font color="#00aaaa" v-if="channelColorFlag['pizza'] === 1">
+                        録画保管庫
+                    </font>
+                    <font v-else>
+                        録画保管庫
+                    </font>
+                </a></li>
 
+                <br />
+                <li><a href="#" class="btn" @click="eachFeed('kiyo')">
+                    <font color="#00aaaa" v-if="channelColorFlag['kiyo'] === 1">
+                        キヨ
+                    </font>
+                    <font v-else>
+                        キヨ
+                    </font>
+                </a></li>
+                <li><a href="#" class="btn" @click="eachFeed('ushizawa')">
+                    <font color="#00aaaa" v-if="channelColorFlag['ushizawa'] === 1">
+                        牛沢
+                    </font>
+                    <font v-else>
+                        牛沢
+                    </font>
+                </a></li>
+                <li><a href="#" class="btn" @click="eachFeed('mokou')">
+                    <font color="#00aaaa" v-if="channelColorFlag['mokou'] === 1">
+                        もこう
+                    </font>
+                    <font v-else>
+                        もこう
+                    </font>
+                </a></li>
+            </ul>
+        </div>
+
+        <div class="body">
             <h1 class="pageTitle">{{ pageTitle }}</h1>
             <article v-for="(list, index) in feed.items" :key="index">
                 <figure>
@@ -22,93 +107,6 @@
                 </div>
             </article>
             <br />
-
-        </div>
-
-        <div class="sidebar">
-            <ul>
-                <li><a href="#" class="btn" @click="getAll">
-                    reload all
-                </a></li>
-                <li><a href="#" class="btn" @click="show_watch_later">
-                    watch later
-                </a></li>
-                <br />
-                <li><a href="#" class="btn" @click="eachFeed('jun', 'jun channel')">
-                    <font color="#00aaaa" v-if="channelColorFlag['jun'] === 1">
-                        jun channel
-                    </font>
-                    <font v-else>
-                        jun channel
-                    </font>
-                </a></li>
-                <li><a href="#" class="btn" @click="eachFeed('UNK', 'UNKちゃんねる')">
-                    <font color="#00aaaa" v-if="channelColorFlag['UNK'] === 1">
-                        UNKちゃんねる
-                    </font>
-                    <font v-else>
-                        UNKちゃんねる
-                    </font>
-                </a></li>
-                <li><a href="#" class="btn" @click="eachFeed('kirinuki', '切り抜き')">
-                    <font color="#00aaaa" v-if="channelColorFlag['kirinuki'] === 1">
-                        切り抜き
-                    </font>
-                    <font v-else>
-                        切り抜き
-                    </font>
-                </a></li>
-                <li><a href="#" class="btn" @click="eachFeed('kirinuki2', '切り抜き2')">
-                    <font color="#00aaaa" v-if="channelColorFlag['kirinuki2'] === 1">
-                        切り抜き2
-                    </font>
-                    <font v-else>
-                        切り抜き2
-                    </font>
-                </a></li>
-                <li><a href="#" class="btn" @click="eachFeed('pizza', 'ピザラジ')">
-                    <font color="#00aaaa" v-if="channelColorFlag['pizza'] === 1">
-                        ピザラジ
-                    </font>
-                    <font v-else>
-                        ピザラジ
-                    </font>
-                </a></li>
-                <li><a href="#" class="btn" @click="eachFeed('hokanko', '録画保管庫')">
-                    <font color="#00aaaa" v-if="channelColorFlag['pizza'] === 1">
-                        録画保管庫
-                    </font>
-                    <font v-else>
-                        録画保管庫
-                    </font>
-                </a></li>
-
-                <br />
-                <li><a href="#" class="btn" @click="eachFeed('kiyo', 'キヨ')">
-                    <font color="#00aaaa" v-if="channelColorFlag['kiyo'] === 1">
-                        キヨ
-                    </font>
-                    <font v-else>
-                        キヨ
-                    </font>
-                </a></li>
-                <li><a href="#" class="btn" @click="eachFeed('ushizawa', '牛沢')">
-                    <font color="#00aaaa" v-if="channelColorFlag['ushizawa'] === 1">
-                        牛沢
-                    </font>
-                    <font v-else>
-                        牛沢
-                    </font>
-                </a></li>
-                <li><a href="#" class="btn" @click="eachFeed('mokou', 'もこう')">
-                    <font color="#00aaaa" v-if="channelColorFlag['mokou'] === 1">
-                        もこう
-                    </font>
-                    <font v-else>
-                        もこう
-                    </font>
-                </a></li>
-            </ul>
         </div>
 
     </div>
@@ -188,9 +186,18 @@ export default {
             if (!(self.newest[channel])) {
                 console.log('none');
             }else if (self.newest[channel].date === self.allFeed[channel].items[0].date){
+                // 新着なし
                 self.channelColorFlag[channel] = 0;
             } else {
+                // 新着あり
                 self.channelColorFlag[channel] = 1;
+                let notif = new Notification(self.allFeed[channel].channelNickname, {
+                    body: self.allFeed[channel].items[0].title,
+                    timeout: 4000,
+                });
+                notif.onclick = () => {
+                  self.add_watch_later("watch later", self.allFeed[channel].items[0]);
+                }
             }
         },
 
@@ -200,15 +207,15 @@ export default {
             self.allFeed = {};
             //それぞれの名前とxmlへのurl
             const feedList = [
-                ["UNK", "https://ch.nicovideo.jp/unkchanel/live?rss=2.0"],
-                ["jun", "https://www.youtube.com/feeds/videos.xml?channel_id=UCx1nAvtVDIsaGmCMSe8ofsQ"],
-                ["kirinuki", "https://www.youtube.com/feeds/videos.xml?channel_id=UCH-lygWpHodDff3iQurnWnQ"],
-                ["kirinuki2", "https://www.youtube.com/feeds/videos.xml?channel_id=UCddGctO9eY4-lKIwDj42p0Q"],
-                ["pizza", "https://www.youtube.com/feeds/videos.xml?channel_id=UCeWZN7rNRQaHCtMCdHEZFqw"],
-                ["hokanko", "https://www.youtube.com/feeds/videos.xml?channel_id=UC4vLrf83XQ9zpGx6XqDgk3g"],
-                ["mokou", "https://www.youtube.com/feeds/videos.xml?channel_id=UCENoC6MLc4pL-vehJyzSWmg"],
-                ["kiyo", "https://www.youtube.com/feeds/videos.xml?channel_id=UCMJiPpN_09F0aWpQrgbc_qg"],
-                ["ushizawa", "https://www.youtube.com/feeds/videos.xml?channel_id=UCZMRuagdTBKmmrFtSMN48Xw"],
+                ["UNK", "https://ch.nicovideo.jp/unkchanel/live?rss=2.0", "UNKちゃんねる"],
+                ["jun", "https://www.youtube.com/feeds/videos.xml?channel_id=UCx1nAvtVDIsaGmCMSe8ofsQ", "jun channel"],
+                ["kirinuki", "https://www.youtube.com/feeds/videos.xml?channel_id=UCH-lygWpHodDff3iQurnWnQ", "切り抜き"],
+                ["kirinuki2", "https://www.youtube.com/feeds/videos.xml?channel_id=UCddGctO9eY4-lKIwDj42p0Q", "切り抜き2"],
+                ["pizza", "https://www.youtube.com/feeds/videos.xml?channel_id=UCeWZN7rNRQaHCtMCdHEZFqw", "ピザラジ"],
+                ["hokanko", "https://www.youtube.com/feeds/videos.xml?channel_id=UC4vLrf83XQ9zpGx6XqDgk3g", "録画保管庫"],
+                ["mokou", "https://www.youtube.com/feeds/videos.xml?channel_id=UCENoC6MLc4pL-vehJyzSWmg", "もこう"],
+                ["kiyo", "https://www.youtube.com/feeds/videos.xml?channel_id=UCMJiPpN_09F0aWpQrgbc_qg", "キヨ"],
+                ["ushizawa", "https://www.youtube.com/feeds/videos.xml?channel_id=UCZMRuagdTBKmmrFtSMN48Xw", "牛沢"],
             ];
 
             const Parser = require('rss-parser');
@@ -230,6 +237,7 @@ export default {
                         let parsed = await nicoParser.parseURL(feedList[loop][1]);
                         //追加
                         self.allFeed[feedList[loop][0]] = parsed;
+                        self.allFeed[feedList[loop][0]]["channelNickname"] = feedList[loop][2];
 
                         // 日付・description・thumbnail 整える
                         for(let j = 0; j < self.allFeed[feedList[loop][0]].items.length; j++) {
@@ -253,6 +261,7 @@ export default {
                         let parsed = await tubeParser.parseURL(feedList[loop][1]);
                         //追加
                         self.allFeed[feedList[loop][0]] = parsed;
+                        self.allFeed[feedList[loop][0]]["channelNickname"] = feedList[loop][2];
 
                         // 日付・description・thumbnail 整える
                         for(let j = 0; j < self.allFeed[feedList[loop][0]].items.length; j++) {
@@ -274,16 +283,15 @@ export default {
             }
 
             console.log('loaded');
-            setTimeout(self.eachFeed, 1500, 'default', 'default');
+            setTimeout(self.eachFeed, 1500, 'default');
         },
 
 
-        eachFeed(channel, channelNickname) {
+        eachFeed(channel) {
             let self = this;
             let newFeedindex = 0;
             if (channel === 'default') {
                 channel = 'jun';
-                channelNickname = 'jun channel';
                 for (;newFeedindex < self.allFeed[channel].items.length; newFeedindex++){
                     if (!(self.newest[channel])) {
                         continue;
@@ -316,7 +324,7 @@ export default {
             }
 
             self.feed = this.allFeed[channel];
-            self.pageTitle = channelNickname;
+            self.pageTitle = self.allFeed[channel].channelNickname;
             self.add_remove = "watch later";
         },
 
