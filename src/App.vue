@@ -50,7 +50,7 @@
                     </font>
                 </a></li>
                 <li><a href="#" class="btn" @click="eachFeed('hokanko')">
-                    <font color="#00aaaa" v-if="channelColorFlag['pizza'] === 1">
+                    <font color="#00aaaa" v-if="channelColorFlag['hokanko'] === 1">
                         録画保管庫
                     </font>
                     <font v-else>
@@ -93,7 +93,6 @@
                     <img :src="list.thumbnail" />
                 </figure>
                 <div class="text_content">
-                    <p class="date">{{ list.date }}</p>
                     <h2><a @click="openPage(list.link)">
                         <font color="#00aaaa" v-if="NewFeedindex>index">
                             {{ list.title }}
@@ -103,6 +102,7 @@
                         </font>
                     </a></h2>
                     <p class = "description">{{ list.description }}</p>
+                    <span class="date">{{ list.date }}</span>
                     <a href="javascript:void(0)" class="btn" @click="add_watch_later(add_remove, list); return false;">{{ add_remove }}</a>
                 </div>
             </article>
@@ -163,11 +163,10 @@ export default {
             let D = new Date(iso);
             let month = self.getdoubleDigestNumer(D.getMonth() + 1);
             let date = self.getdoubleDigestNumer(D.getDate());
-            let h = self.getdoubleDigestNumer(D.getHours());
+            let H = self.getdoubleDigestNumer(D.getHours());
             let M = self.getdoubleDigestNumer(D.getMinutes());
-            let S = self.getdoubleDigestNumer(D.getSeconds());
 
-            let formatted = D.getFullYear() + "/" + month + "/" + date + " " + h + ":" + M + ":" + S;
+            let formatted = month + "/" + date + " " + H + ":" + M;
             self.allFeed[channel].items[loop]["date"] = formatted;
         },
 
@@ -185,6 +184,7 @@ export default {
             let self = this;
             if (!(self.newest[channel])) {
                 console.log('none');
+                self.channelColorFlag[channel] = 0;
             }else if (self.newest[channel].date === self.allFeed[channel].items[0].date){
                 // 新着なし
                 self.channelColorFlag[channel] = 0;
@@ -396,10 +396,29 @@ export default {
         box-shadow: 0 0 5px #777;
         background-color: #333;
     }
+    article figure {
+        margin-block-start: 30px;
+        margin-block-end: 15px;
+        margin-inline-start: 40px;
+        margin-inline-end: 30px;
+    }
     article figure img {
-        margin-top: 20px;
         height: 150px;
         vertical-align: middle;
+    }
+
+    h1 {
+        margin-block-start: 15px;
+        margin-block-end: 15px;
+    }
+    h2 {
+        margin-block-end: 5px;
+    }
+    p.description {
+        margin-block-start: 5px;
+    }
+    .text_content a.btn {
+        margin-left: 150px;
     }
 
     .sidebar {
@@ -431,17 +450,23 @@ export default {
     }
 
     .text_content {
+        margin-right: 10px;
         color: #ccc;
     }
 
     .btn {
         display: inline-block;
-        padding: 0.1em 0.4em;
-        text-decoration: none;
+        padding: 0.1em 0.5em;
+        margin-bottom: 2px;
         background: #555;
         color: #FFF;
         border-bottom: solid 4px #444;
         border-radius: 2px;
+        transition: font-size 300ms;
+    }
+    .btn:hover {
+        text-decoration: none;
+        font-size: 115%;
     }
     .btn:active {
         background: #444;
@@ -449,9 +474,10 @@ export default {
     }
 
     .date {
-        color: #888;
+        color: #999;
     }
     .description {
         color: #888;
+        padding-bottom: 20px;
     }
 </style>
