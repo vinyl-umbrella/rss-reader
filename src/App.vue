@@ -184,7 +184,7 @@ export default {
             let self = this;
             if (!(self.newest[channel])) {
                 console.log('none');
-                self.channelColorFlag[channel] = 0;
+                self.channelColorFlag[channel] = 1;
             }else if (self.newest[channel].date === self.allFeed[channel].items[0].date){
                 // 新着なし
                 self.channelColorFlag[channel] = 0;
@@ -462,15 +462,18 @@ export default {
         color: #FFF;
         border-bottom: solid 4px #444;
         border-radius: 2px;
-        transition: font-size 300ms;
-    }
-    .btn:hover {
-        text-decoration: none;
-        font-size: 115%;
     }
     .btn:active {
         background: #444;
         color: #DDD;
+    }
+
+    li a.btn {
+        transition: font-size 300ms;
+    }
+    li a.btn:hover {
+        text-decoration: none;
+        font-size: 115%;
     }
 
     .date {
