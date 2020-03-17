@@ -1,3 +1,5 @@
+# rss-reader
+
 ## How to install
 ```
 npm install --production
@@ -17,3 +19,6 @@ src/App.jsのコードを編集
 - 任意のfeedを追加する機能
     - ボタンの追加とgetAllの中にxmlのリンクを追加により任意のfeedを追加することができる(もっと楽に追加したい)
 - windowサイズの記憶
+
+## License
+MIT
