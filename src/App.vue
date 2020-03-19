@@ -83,6 +83,15 @@
                         もこう
                     </font>
                 </a></li>
+                <li><a href="#" class="btn" @click="eachFeed('mokou_kirinuki')">
+                    <font color="#00aaaa" v-if="channelColorFlag['mokou_kirinuki'] === 1">
+                        もこう切り抜き
+                    </font>
+                    <font v-else>
+                        もこう切り抜き
+                    </font>
+                </a></li>
+
             </ul>
         </div>
 
@@ -213,9 +222,10 @@ export default {
                 ["kirinuki2", "https://www.youtube.com/feeds/videos.xml?channel_id=UCddGctO9eY4-lKIwDj42p0Q", "切り抜き2"],
                 ["pizza", "https://www.youtube.com/feeds/videos.xml?channel_id=UCeWZN7rNRQaHCtMCdHEZFqw", "ピザラジ"],
                 ["hokanko", "https://www.youtube.com/feeds/videos.xml?channel_id=UC4vLrf83XQ9zpGx6XqDgk3g", "録画保管庫"],
-                ["mokou", "https://www.youtube.com/feeds/videos.xml?channel_id=UCENoC6MLc4pL-vehJyzSWmg", "もこう"],
                 ["kiyo", "https://www.youtube.com/feeds/videos.xml?channel_id=UCMJiPpN_09F0aWpQrgbc_qg", "キヨ"],
                 ["ushizawa", "https://www.youtube.com/feeds/videos.xml?channel_id=UCZMRuagdTBKmmrFtSMN48Xw", "牛沢"],
+                ["mokou", "https://www.youtube.com/feeds/videos.xml?channel_id=UCENoC6MLc4pL-vehJyzSWmg", "もこう"],
+                ["mokou_kirinuki", "https://www.youtube.com/feeds/videos.xml?channel_id=UC66kipgL5DTVPFg7mzWdBCw", "もこう切り抜き"],
             ];
 
             const Parser = require('rss-parser');
