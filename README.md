@@ -1,24 +1,39 @@
 # rss-reader
 
-## How to install
+<img src="./img/sample.png" width="480px">
+
+## Features
+- [x] 通知機能
+    -  動画が投稿または生放送が始まってから10分以内に通知
+    - 通知をクリックするとwatch laterリストに保存
+    - youtubeの予約枠の開始時刻に通知できない
+- [x] 任意のfeedの登録
+    - youtube, ニコニコチャンネル生放送に対応
+- [x] 新しく投稿があったチャンネルのハイライト機能
+- [x] 後で見ようと思った投稿の記憶機能
+- [x] リンクを既定のブラウザで開く
+
+
+## How to Add Feed
+- :%homepath%\AppData\Local\Programs\rss-reader\feedList.csvに追加する
+- format
+    - 一意の英数字,サイドバーに使われるタイトル,feedのurl
+        - youtubeの場合: https://www.youtube.com/feeds/videos.xml?channel_id=?????
+        - ニコニコの場合: https://ch.nicovideo.jp/?????/live?rss=2.0
+
+
+## How to Install
 ```
 npm install --production
 npm run electron:build
 ```
 
-## How to add feeds
-src/App.jsのコードを編集
-- getAllのfeedListに名前とリンクを追加
-- サイドバーのボタンを追加
-
+<!--
 ## 今後追加したい機能
-- サイドバーをv-forで回す
-    - jsonは順不同であるため困難?
 - すべてのfeedを時系列順で並べるページ
-- アプリアイコン作成(win, mac, linux)
-- 任意のfeedを追加する機能
-    - ボタンの追加とgetAllの中にxmlのリンクを追加により任意のfeedを追加することができる(もっと楽に追加したい)
+- アプリアイコン作成(mac, linux)
 - windowサイズの記憶
+-->
 
 ## License
 MIT

@@ -2,95 +2,24 @@
     <div id="app">
         <div class="sidebar">
             <ul>
-                <li><a href="#" class="btn" @click="getAll">
+                <li><a href="#" class="btn" @click="getAll" title="Ctrl + r">
                     reload all
                 </a></li>
                 <li><a href="#" class="btn" @click="show_watch_later">
                     watch later
                 </a></li>
                 <br />
-                <li><a href="#" class="btn" @click="eachFeed('jun')">
-                    <font color="#00aaaa" v-if="channelColorFlag['jun'] === 1">
-                        jun channel
-                    </font>
-                    <font v-else>
-                        jun channel
-                    </font>
-                </a></li>
-                <li><a href="#" class="btn" @click="eachFeed('UNK')">
-                    <font color="#00aaaa" v-if="channelColorFlag['UNK'] === 1">
-                        UNKちゃんねる
-                    </font>
-                    <font v-else>
-                        UNKちゃんねる
-                    </font>
-                </a></li>
-                <li><a href="#" class="btn" @click="eachFeed('kirinuki')">
-                    <font color="#00aaaa" v-if="channelColorFlag['kirinuki'] === 1">
-                        切り抜き
-                    </font>
-                    <font v-else>
-                        切り抜き
-                    </font>
-                </a></li>
-                <li><a href="#" class="btn" @click="eachFeed('kirinuki2')">
-                    <font color="#00aaaa" v-if="channelColorFlag['kirinuki2'] === 1">
-                        切り抜き2
-                    </font>
-                    <font v-else>
-                        切り抜き2
-                    </font>
-                </a></li>
-                <li><a href="#" class="btn" @click="eachFeed('pizza')">
-                    <font color="#00aaaa" v-if="channelColorFlag['pizza'] === 1">
-                        ピザラジ
-                    </font>
-                    <font v-else>
-                        ピザラジ
-                    </font>
-                </a></li>
-                <li><a href="#" class="btn" @click="eachFeed('hokanko')">
-                    <font color="#00aaaa" v-if="channelColorFlag['hokanko'] === 1">
-                        録画保管庫
-                    </font>
-                    <font v-else>
-                        録画保管庫
-                    </font>
-                </a></li>
 
-                <br />
-                <li><a href="#" class="btn" @click="eachFeed('kiyo')">
-                    <font color="#00aaaa" v-if="channelColorFlag['kiyo'] === 1">
-                        キヨ
-                    </font>
-                    <font v-else>
-                        キヨ
-                    </font>
-                </a></li>
-                <li><a href="#" class="btn" @click="eachFeed('ushizawa')">
-                    <font color="#00aaaa" v-if="channelColorFlag['ushizawa'] === 1">
-                        牛沢
-                    </font>
-                    <font v-else>
-                        牛沢
-                    </font>
-                </a></li>
-                <li><a href="#" class="btn" @click="eachFeed('mokou')">
-                    <font color="#00aaaa" v-if="channelColorFlag['mokou'] === 1">
-                        もこう
-                    </font>
-                    <font v-else>
-                        もこう
-                    </font>
-                </a></li>
-                <li><a href="#" class="btn" @click="eachFeed('mokou_kirinuki')">
-                    <font color="#00aaaa" v-if="channelColorFlag['mokou_kirinuki'] === 1">
-                        もこう切り抜き
-                    </font>
-                    <font v-else>
-                        もこう切り抜き
-                    </font>
-                </a></li>
+                <div v-for="(channel, index) in feedList" :key="index">
+                    <li><a href="#" class="btn" @click="eachFeed(channel[0])">
+                        <font color="#00aaaa" v-if="channelColorFlag[channel[0]] === 1">
+                            {{ channel[1]}}
+                        </font>
+                        <font v-else>
+                            {{ channel[1]}}
+                        </font>
+                    </a></li>
+                </div>
 
             </ul>
         </div>
@@ -126,6 +55,42 @@ const { shell } = require('electron');
 
 export default {
     created: function() {
+        const fs = require('fs');
+        const file_path = './feedList.csv';
+        const default_text = 'UNK,UNKちゃんねる,https://ch.nicovideo.jp/unkchanel/live?rss=2.0\njun,jun channel,https://www.youtube.com/feeds/videos.xml?channel_id=UCx1nAvtVDIsaGmCMSe8ofsQ\nkirinuki,切り抜き,https://www.youtube.com/feeds/videos.xml?channel_id=UCH-lygWpHodDff3iQurnWnQ\n';
+        let temp = '';
+        try {
+            fs.statSync(file_path);
+            temp = fs.readFileSync(file_path, 'utf-8');
+            temp = temp.split('\n');
+            if (temp[temp.length - 1].length === 0) {
+                temp.pop();
+            }
+            for (let loop=0; loop<temp.length; loop++) {
+                temp[loop] = temp[loop].split(',');
+            }
+            // console.log(temp);
+            this.feedList = temp;
+
+        } catch(err) {
+            // 設定ファイルが存在しない場合
+            if (err.code === 'ENOENT') {
+                fs.writeFileSync(file_path, default_text);
+                temp = fs.readFileSync(file_path, 'utf-8');
+                temp = temp.split('\n');
+                if (temp[temp.length - 1].length === 0) {
+                    temp.pop();
+                }
+                for (let loop=0; loop<temp.length; loop++) {
+                    temp[loop] = temp[loop].split(',');
+                }
+                // console.log(temp);
+                this.feedList = temp;
+            } else {
+                console.log('file read error');
+            }
+        }
+
         // localStorageに watch_later_list が存在すれば取ってくる
         if (localStorage.getItem('watch_later_list')) {
             this.later = JSON.parse(localStorage.getItem('watch_later_list'));
@@ -158,6 +123,8 @@ export default {
             // 何番目のfeedが最新か示す値
             NewFeedindex: "",
             channelColorFlag: {},
+            //それぞれの名前とxmlへのurl
+            feedList: [],
         }
     },
     methods: {
@@ -192,9 +159,8 @@ export default {
         detectNew(channel) {
             let self = this;
             if (!(self.newest[channel])) {
-                console.log('none');
                 self.channelColorFlag[channel] = 1;
-            }else if (self.newest[channel].date === self.allFeed[channel].items[0].date){
+            } else if (self.newest[channel].date === self.allFeed[channel].items[0].date) {
                 // 新着なし
                 self.channelColorFlag[channel] = 0;
             } else {
@@ -214,19 +180,6 @@ export default {
             let self = this;
             //初期化
             self.allFeed = {};
-            //それぞれの名前とxmlへのurl
-            const feedList = [
-                ["UNK", "https://ch.nicovideo.jp/unkchanel/live?rss=2.0", "UNKちゃんねる"],
-                ["jun", "https://www.youtube.com/feeds/videos.xml?channel_id=UCx1nAvtVDIsaGmCMSe8ofsQ", "jun channel"],
-                ["kirinuki", "https://www.youtube.com/feeds/videos.xml?channel_id=UCH-lygWpHodDff3iQurnWnQ", "切り抜き"],
-                ["kirinuki2", "https://www.youtube.com/feeds/videos.xml?channel_id=UCddGctO9eY4-lKIwDj42p0Q", "切り抜き2"],
-                ["pizza", "https://www.youtube.com/feeds/videos.xml?channel_id=UCeWZN7rNRQaHCtMCdHEZFqw", "ピザラジ"],
-                ["hokanko", "https://www.youtube.com/feeds/videos.xml?channel_id=UC4vLrf83XQ9zpGx6XqDgk3g", "録画保管庫"],
-                ["kiyo", "https://www.youtube.com/feeds/videos.xml?channel_id=UCMJiPpN_09F0aWpQrgbc_qg", "キヨ"],
-                ["ushizawa", "https://www.youtube.com/feeds/videos.xml?channel_id=UCZMRuagdTBKmmrFtSMN48Xw", "牛沢"],
-                ["mokou", "https://www.youtube.com/feeds/videos.xml?channel_id=UCENoC6MLc4pL-vehJyzSWmg", "もこう"],
-                ["mokou_kirinuki", "https://www.youtube.com/feeds/videos.xml?channel_id=UC66kipgL5DTVPFg7mzWdBCw", "もこう切り抜き"],
-            ];
 
             const Parser = require('rss-parser');
             const nicoParser = new Parser({
@@ -240,53 +193,53 @@ export default {
                 }
             });
 
-            for (let loop=0; loop<feedList.length; loop++) {
-                if (feedList[loop][1].match(/nicovideo/)) {     //nicoliveの場合
+            for (let loop=0; loop<self.feedList.length; loop++) {
+                if (self.feedList[loop][2].match(/nicovideo/)) {     //nicoliveの場合
                     (async () => {
                         //パース
-                        let parsed = await nicoParser.parseURL(feedList[loop][1]);
+                        let parsed = await nicoParser.parseURL(self.feedList[loop][2]);
                         //追加
-                        self.allFeed[feedList[loop][0]] = parsed;
-                        self.allFeed[feedList[loop][0]]["channelNickname"] = feedList[loop][2];
+                        self.allFeed[self.feedList[loop][0]] = parsed;
+                        self.allFeed[self.feedList[loop][0]]["channelNickname"] = self.feedList[loop][1];
 
                         // 日付・description・thumbnail 整える
-                        for(let j = 0; j < self.allFeed[feedList[loop][0]].items.length; j++) {
+                        for(let j = 0; j < self.allFeed[self.feedList[loop][0]].items.length; j++) {
                             //日付表示を整える
-                            self.setDate(self.allFeed[feedList[loop][0]].items[j].isoDate, feedList[loop][0], j);
+                            self.setDate(self.allFeed[self.feedList[loop][0]].items[j].isoDate, self.feedList[loop][0], j);
                             //description追加
-                            if (!("description" in self.allFeed[feedList[loop][0]].items[j])) {
-                                self.setDescription(feedList[loop][0], j);
+                            if (!("description" in self.allFeed[self.feedList[loop][0]].items[j])) {
+                                self.setDescription(self.feedList[loop][0], j);
                             }
                             //thumbnail追加
-                            if (!("thumbnail" in self.allFeed[feedList[loop][0]].items[j])) {
-                                self.allFeed[feedList[loop][0]].items[j]["thumbnail"] = self.allFeed[feedList[loop][0]].items[j]["nicoch:live_thumbnail"];
+                            if (!("thumbnail" in self.allFeed[self.feedList[loop][0]].items[j])) {
+                                self.allFeed[self.feedList[loop][0]].items[j]["thumbnail"] = self.allFeed[self.feedList[loop][0]].items[j]["nicoch:live_thumbnail"];
                             }
                         }
-                        self.detectNew(feedList[loop][0]);
+                        self.detectNew(self.feedList[loop][0]);
                     })();
 
-                }else if (feedList[loop][1].match(/youtube.com/)) {     //tubeの場合
+                }else if (self.feedList[loop][2].match(/youtube.com/)) {     //tubeの場合
                     (async () => {
                         //パース
-                        let parsed = await tubeParser.parseURL(feedList[loop][1]);
+                        let parsed = await tubeParser.parseURL(self.feedList[loop][2]);
                         //追加
-                        self.allFeed[feedList[loop][0]] = parsed;
-                        self.allFeed[feedList[loop][0]]["channelNickname"] = feedList[loop][2];
+                        self.allFeed[self.feedList[loop][0]] = parsed;
+                        self.allFeed[self.feedList[loop][0]]["channelNickname"] = self.feedList[loop][1];
 
                         // 日付・description・thumbnail 整える
-                        for(let j = 0; j < self.allFeed[feedList[loop][0]].items.length; j++) {
+                        for(let j = 0; j < self.allFeed[self.feedList[loop][0]].items.length; j++) {
                             //日付表示を整える
-                            self.setDate(self.allFeed[feedList[loop][0]].items[j].isoDate, feedList[loop][0], j);
+                            self.setDate(self.allFeed[self.feedList[loop][0]].items[j].isoDate, self.feedList[loop][0], j);
                             //description追加
-                            if (!("description" in self.allFeed[feedList[loop][0]].items[j])) {
-                                self.setDescription(feedList[loop][0], j);
+                            if (!("description" in self.allFeed[self.feedList[loop][0]].items[j])) {
+                                self.setDescription(self.feedList[loop][0], j);
                             }
                             //thumbnail追加 nicoとtubeで場合分け
-                            if (!("thumbnail" in self.allFeed[feedList[loop][0]].items[j])) {
-                                self.allFeed[feedList[loop][0]].items[j]["thumbnail"] = self.allFeed[feedList[loop][0]].items[j]["media:group"]["media:thumbnail"][0]["$"]["url"];
+                            if (!("thumbnail" in self.allFeed[self.feedList[loop][0]].items[j])) {
+                                self.allFeed[self.feedList[loop][0]].items[j]["thumbnail"] = self.allFeed[self.feedList[loop][0]].items[j]["media:group"]["media:thumbnail"][0]["$"]["url"];
                             }
                         }
-                        self.detectNew(feedList[loop][0]);
+                        self.detectNew(self.feedList[loop][0]);
                     })();
 
                 }
