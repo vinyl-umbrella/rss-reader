@@ -19,6 +19,7 @@
                             {{ channel[1]}}
                         </font>
                     </a></li>
+                    <br v-if="index===5"/>
                 </div>
 
             </ul>
