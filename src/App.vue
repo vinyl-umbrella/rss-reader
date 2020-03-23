@@ -12,12 +12,12 @@
 
                 <div v-for="(channel, index) in feedList" :key="index">
                     <li><a href="#" class="btn" @click="eachFeed(channel[0])">
-                        <font color="#00aaaa" v-if="channelColorFlag[channel[0]] === 1">
+                        <span style="color:#00aaaa;" v-if="channelColorFlag[channel[0]] === 1">
                             {{ channel[1]}}
-                        </font>
-                        <font v-else>
+                        </span>
+                        <span v-else>
                             {{ channel[1]}}
-                        </font>
+                        </span>
                     </a></li>
                     <br v-if="index===5"/>
                 </div>
@@ -26,19 +26,21 @@
         </div>
 
         <div class="body">
-            <h1 class="pageTitle">{{ pageTitle }}</h1>
+            <h1 class="pageTitle"><a @click="openPage(feed.link)">
+                {{ pageTitle }}
+            </a></h1>
             <article v-for="(list, index) in feed.items" :key="index">
                 <figure>
                     <img :src="list.thumbnail" />
                 </figure>
                 <div class="text_content">
                     <h2><a @click="openPage(list.link)">
-                        <font color="#00aaaa" v-if="NewFeedindex>index">
+                        <span style="color:#00aaaa;" v-if="NewFeedindex>index">
                             {{ list.title }}
-                        </font>
-                        <font v-else>
+                        </span>
+                        <span v-else>
                             {{ list.title }}
-                        </font>
+                        </span>
                     </a></h2>
                     <p class = "description">{{ list.description }}</p>
                     <span class="date">{{ list.date }}</span>
@@ -58,7 +60,7 @@ export default {
     created: function() {
         const fs = require('fs');
         const file_path = './feedList.csv';
-        const default_text = 'UNK,UNKちゃんねる,https://ch.nicovideo.jp/unkchanel/live?rss=2.0\njun,jun channel,https://www.youtube.com/feeds/videos.xml?channel_id=UCx1nAvtVDIsaGmCMSe8ofsQ\nkirinuki,切り抜き,https://www.youtube.com/feeds/videos.xml?channel_id=UCH-lygWpHodDff3iQurnWnQ\n';
+        const default_text = 'jun,jun channel,https://www.youtube.com/feeds/videos.xml?channel_id=UCx1nAvtVDIsaGmCMSe8ofsQ\nUNK,UNKちゃんねる,https://ch.nicovideo.jp/unkchanel/live?rss=2.0\nkirinuki,切り抜き,https://www.youtube.com/feeds/videos.xml?channel_id=UCH-lygWpHodDff3iQurnWnQ\n';
         let temp = '';
         try {
             fs.statSync(file_path);
@@ -70,7 +72,6 @@ export default {
             for (let loop=0; loop<temp.length; loop++) {
                 temp[loop] = temp[loop].split(',');
             }
-            // console.log(temp);
             this.feedList = temp;
 
         } catch(err) {
@@ -85,7 +86,6 @@ export default {
                 for (let loop=0; loop<temp.length; loop++) {
                     temp[loop] = temp[loop].split(',');
                 }
-                // console.log(temp);
                 this.feedList = temp;
             } else {
                 console.log('file read error');
@@ -128,6 +128,7 @@ export default {
             feedList: [],
         }
     },
+
     methods: {
         getdoubleDigestNumer(number) {
             // 1桁の数を "0+n" にする
@@ -199,6 +200,7 @@ export default {
                     (async () => {
                         //パース
                         let parsed = await nicoParser.parseURL(self.feedList[loop][2]);
+                        parsed.items = parsed.items.slice(0, 8);
                         //追加
                         self.allFeed[self.feedList[loop][0]] = parsed;
                         self.allFeed[self.feedList[loop][0]]["channelNickname"] = self.feedList[loop][1];
@@ -223,6 +225,7 @@ export default {
                     (async () => {
                         //パース
                         let parsed = await tubeParser.parseURL(self.feedList[loop][2]);
+                        parsed.items = parsed.items.slice(0, 8);
                         //追加
                         self.allFeed[self.feedList[loop][0]] = parsed;
                         self.allFeed[self.feedList[loop][0]]["channelNickname"] = self.feedList[loop][1];
@@ -235,7 +238,7 @@ export default {
                             if (!("description" in self.allFeed[self.feedList[loop][0]].items[j])) {
                                 self.setDescription(self.feedList[loop][0], j);
                             }
-                            //thumbnail追加 nicoとtubeで場合分け
+                            //thumbnail追加
                             if (!("thumbnail" in self.allFeed[self.feedList[loop][0]].items[j])) {
                                 self.allFeed[self.feedList[loop][0]].items[j]["thumbnail"] = self.allFeed[self.feedList[loop][0]].items[j]["media:group"]["media:thumbnail"][0]["$"]["url"];
                             }
@@ -255,7 +258,7 @@ export default {
             let self = this;
             let newFeedindex = 0;
             if (channel === 'default') {
-                channel = 'jun';
+                channel = self.feedList[0][0];
                 for (;newFeedindex < self.allFeed[channel].items.length; newFeedindex++){
                     if (!(self.newest[channel])) {
                         continue;
