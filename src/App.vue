@@ -13,10 +13,10 @@
                 <div v-for="(channel, index) in feedList" :key="index">
                     <li><a href="#" class="btn" @click="eachFeed(channel[0])">
                         <span style="color:#00aaaa;" v-if="channelColorFlag[channel[0]] === 1">
-                            {{ channel[1]}}
+                            {{ channel[0] }}
                         </span>
                         <span v-else>
-                            {{ channel[1]}}
+                            {{ channel[0] }}
                         </span>
                     </a></li>
                     <br v-if="index===5"/>
@@ -60,7 +60,7 @@ export default {
     created: function() {
         const fs = require('fs');
         const file_path = require('os').homedir() + '/Documents/.feedList.csv';
-        const default_text = 'jun,jun channel,https://www.youtube.com/feeds/videos.xml?channel_id=UCx1nAvtVDIsaGmCMSe8ofsQ\nUNK,UNKちゃんねる,https://ch.nicovideo.jp/unkchanel/live?rss=2.0\nkirinuki,切り抜き,https://www.youtube.com/feeds/videos.xml?channel_id=UCH-lygWpHodDff3iQurnWnQ\n';
+        const default_text = 'jun channel,https://www.youtube.com/feeds/videos.xml?channel_id=UCx1nAvtVDIsaGmCMSe8ofsQ\nUNKちゃんねる,https://ch.nicovideo.jp/unkchanel/live?rss=2.0\n切り抜き,https://www.youtube.com/feeds/videos.xml?channel_id=UCH-lygWpHodDff3iQurnWnQ\n';
         let temp = '';
         try {
             fs.statSync(file_path);
@@ -186,14 +186,14 @@ export default {
             });
 
             for (let loop=0; loop<self.feedList.length; loop++) {
-                if (self.feedList[loop][2].match(/nicovideo/)) {     //nicoliveの場合
+                if (self.feedList[loop][1].match(/nicovideo/)) {     //nicoliveの場合
                     (async () => {
                         //パース
-                        let parsed = await nicoParser.parseURL(self.feedList[loop][2]);
+                        let parsed = await nicoParser.parseURL(self.feedList[loop][1]);
                         parsed.items = parsed.items.slice(0, 8);
                         //追加
                         self.allFeed[self.feedList[loop][0]] = parsed;
-                        self.allFeed[self.feedList[loop][0]]["channelNickname"] = self.feedList[loop][1];
+                        self.allFeed[self.feedList[loop][0]]["channelNickname"] = self.feedList[loop][0];
 
                         // 日付・description・thumbnail 整える
                         for(let j = 0; j < self.allFeed[self.feedList[loop][0]].items.length; j++) {
@@ -211,14 +211,14 @@ export default {
                         self.detectNew(self.feedList[loop][0]);
                     })();
 
-                }else if (self.feedList[loop][2].match(/youtube.com/)) {     //tubeの場合
+                }else if (self.feedList[loop][1].match(/youtube.com/)) {     //tubeの場合
                     (async () => {
                         //パース
-                        let parsed = await tubeParser.parseURL(self.feedList[loop][2]);
+                        let parsed = await tubeParser.parseURL(self.feedList[loop][1]);
                         parsed.items = parsed.items.slice(0, 8);
                         //追加
                         self.allFeed[self.feedList[loop][0]] = parsed;
-                        self.allFeed[self.feedList[loop][0]]["channelNickname"] = self.feedList[loop][1];
+                        self.allFeed[self.feedList[loop][0]]["channelNickname"] = self.feedList[loop][0];
 
                         // 日付・description・thumbnail 整える
                         for(let j = 0; j < self.allFeed[self.feedList[loop][0]].items.length; j++) {
