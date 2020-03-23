@@ -26,9 +26,14 @@
         </div>
 
         <div class="body">
-            <h1 class="pageTitle"><a @click="openPage(feed.link)">
-                {{ pageTitle }}
-            </a></h1>
+            <h1 class="pageTitle">
+                <a @click="openPage(feed.link)" v-if="feed.channelNickname">
+                    {{ feed.channelNickname }}
+                </a>
+                <div v-else>
+                    watch later
+                </div>
+            </h1>
             <article v-for="(list, index) in feed.items" :key="index">
                 <figure>
                     <img :src="list.thumbnail" />
@@ -44,7 +49,12 @@
                     </a></h2>
                     <p class = "description">{{ list.description }}</p>
                     <span class="date">{{ list.date }}</span>
-                    <a href="javascript:void(0)" class="btn" @click="add_watch_later(add_remove, list); return false;">{{ add_remove }}</a>
+                    <a href="javascript:void(0)" class="btn" @click="add_watch_later(list); return false;" v-if="feed.title">
+                        <span>watch later</span>
+                    </a>
+                    <a href="javascript:void(0)" class="btn" @click="remove_watch_later(list); return false;" v-else>
+                        <span>remove</span>
+                    </a>
                 </div>
             </article>
             <br />
@@ -108,9 +118,6 @@ export default {
             },
             // それぞれのチャンネルの最新のfeedのリスト
             newest: {},
-            // ボタンのテキスト
-            add_remove: "watch later",
-            pageTitle: "",
             // 何番目のfeedが最新か示す値
             NewFeedindex: "",
             channelColorFlag: {},
@@ -158,7 +165,7 @@ export default {
             } else {
                 // 新着あり
                 self.channelColorFlag[channel] = 1;
-                let notif = new Notification(self.allFeed[channel].channelNickname, {
+                let notif = new Notification(channel, {
                     body: self.allFeed[channel].items[0].title,
                     timeout: 4000,
                 });
@@ -239,7 +246,6 @@ export default {
                 }
             }
 
-            console.log('loaded');
             setTimeout(self.eachFeed, 1500, 'default');
         },
 
@@ -281,8 +287,6 @@ export default {
             }
 
             self.feed = this.allFeed[channel];
-            self.pageTitle = self.allFeed[channel].channelNickname;
-            self.add_remove = "watch later";
         },
 
         //リンクをブラウザで開く
@@ -291,37 +295,35 @@ export default {
         },
 
         //変数listに任意の動画のjsonを追加
-        add_watch_later(add_or_remove, list) {
+        add_watch_later(list) {
             let self = this;
             let notExist = new Boolean(true);
-            if (add_or_remove === "watch later"){
-                //すでにlaterに存在するか判断
-                for(let i=0; i < self.later.items.length; i++) {
-                    if (self.later.items[i] === list) {
-                        notExist = false;
-                    }
+            //すでにlaterに存在するか判断
+            for(let i=0; i < self.later.items.length; i++) {
+                if (self.later.items[i] === list) {
+                    notExist = false;
                 }
-                //存在しないなら追加，localStorageにも変更を反映
-                if (notExist){
-                    self.later.items.push(list);
+            }
+            //存在しないなら追加，localStorageにも変更を反映
+            if (notExist){
+                self.later.items.push(list);
+                localStorage.setItem('watch_later_list', JSON.stringify(self.later));
+            }
+        },
+
+        remove_watch_later(list) {
+            let self = this;
+            //laterから削除，localStorageにも変更を反映
+            for(let i=0; i<self.later.items.length; i++){
+                if (self.later.items[i] === list) {
+                    self.later.items.splice(i, 1);
                     localStorage.setItem('watch_later_list', JSON.stringify(self.later));
-                }
-            } else {
-                //laterから削除，localStorageにも変更を反映
-                for(let i=0; i<self.later.items.length; i++){
-                    if (self.later.items[i] === list) {
-                        self.later.items.splice(i, 1);
-                        localStorage.setItem('watch_later_list', JSON.stringify(self.later));
-                    }
                 }
             }
         },
 
         show_watch_later() {
-            let self = this;
-            self.add_remove = "remove";
-            self.feed = this.later;
-            self.pageTitle = "watch later"
+            this.feed = this.later;
         }
     }
 }
