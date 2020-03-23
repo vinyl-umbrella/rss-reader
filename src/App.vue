@@ -64,33 +64,23 @@ export default {
         let temp = '';
         try {
             fs.statSync(file_path);
-            temp = fs.readFileSync(file_path, 'utf-8');
-            temp = temp.split('\n');
-            if (temp[temp.length - 1].length === 0) {
-                temp.pop();
-            }
-            for (let loop=0; loop<temp.length; loop++) {
-                temp[loop] = temp[loop].split(',');
-            }
-            this.feedList = temp;
-
         } catch(err) {
             // 設定ファイルが存在しない場合
             if (err.code === 'ENOENT') {
                 fs.writeFileSync(file_path, default_text);
-                temp = fs.readFileSync(file_path, 'utf-8');
-                temp = temp.split('\n');
-                if (temp[temp.length - 1].length === 0) {
-                    temp.pop();
-                }
-                for (let loop=0; loop<temp.length; loop++) {
-                    temp[loop] = temp[loop].split(',');
-                }
-                this.feedList = temp;
             } else {
                 console.log('file read error');
             }
         }
+        temp = fs.readFileSync(file_path, 'utf-8');
+        temp = temp.split('\n');
+        if (temp[temp.length - 1].length === 0) {
+            temp.pop();
+        }
+        for (let loop=0; loop<temp.length; loop++) {
+            temp[loop] = temp[loop].split(',');
+        }
+        this.feedList = temp;
 
         // localStorageに watch_later_list が存在すれば取ってくる
         if (localStorage.getItem('watch_later_list')) {
@@ -130,9 +120,9 @@ export default {
     },
 
     methods: {
-        getdoubleDigestNumer(number) {
+        getdoubleDigestNumer(num) {
             // 1桁の数を "0+n" にする
-            return ("0" + number).slice(-2)
+            return ("0" + num).slice(-2)
         },
 
         setDate(iso, channel, loop) {
