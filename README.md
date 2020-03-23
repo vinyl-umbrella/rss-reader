@@ -1,10 +1,12 @@
 # rss-reader
 
+## sample image
 <img src="./img/sample.png" width="480px">
+
 
 ## Features
 - [x] 通知機能
-    -  動画が投稿または生放送が始まってから10分以内に通知
+    - 動画が投稿または生放送が始まってから10分以内に通知
     - 通知をクリックするとwatch laterリストに保存
     - youtubeの予約枠の開始時刻に通知できない
 - [x] 任意のfeedの登録
@@ -15,18 +17,22 @@
 
 
 ## How to Add Feed
-- :%homepath%\AppData\Local\Programs\rss-reader\feedList.csvに追加する
+- windowsの場合
+    - `:%homepath%\\Documents\\.feedList.csv`に追加する
+- macの場合
+    - `$HOME/Documents/.feedList.csv`に追加する
 - format
     - 一意の英数字,サイドバーに使われるタイトル,feedのurl
-        - youtubeの場合: https://www.youtube.com/feeds/videos.xml?channel_id=?????
-        - ニコニコの場合: https://ch.nicovideo.jp/?????/live?rss=2.0
+        - youtubeの場合: `https://www.youtube.com/feeds/videos.xml?channel_id=?????`
+        - ニコニコの場合: `https://ch.nicovideo.jp/?????/live?rss=2.0`
 
 
 ## How to Install
 ```
-npm install --production
+npm install
 npm run electron:build
 ```
+dist_electron内にあるインストーラを実行
 
 <!--
 ## 今後追加したい機能

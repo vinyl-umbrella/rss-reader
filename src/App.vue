@@ -59,7 +59,7 @@ const { shell } = require('electron');
 export default {
     created: function() {
         const fs = require('fs');
-        const file_path = './feedList.csv';
+        const file_path = require('os').homedir() + '/Documents/.feedList.csv';
         const default_text = 'jun,jun channel,https://www.youtube.com/feeds/videos.xml?channel_id=UCx1nAvtVDIsaGmCMSe8ofsQ\nUNK,UNKちゃんねる,https://ch.nicovideo.jp/unkchanel/live?rss=2.0\nkirinuki,切り抜き,https://www.youtube.com/feeds/videos.xml?channel_id=UCH-lygWpHodDff3iQurnWnQ\n';
         let temp = '';
         try {
