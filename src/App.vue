@@ -36,7 +36,7 @@
             </h1>
             <article v-for="(list, index) in feed.items" :key="index">
                 <figure>
-                    <img :src="list.thumbnail" />
+                    <img :src="list.thumbnail" v-if="list.thumbnail" />
                 </figure>
                 <div class="text_content">
                     <h2><a @click="openPage(list.link)">
@@ -47,8 +47,8 @@
                             {{ list.title }}
                         </span>
                     </a></h2>
-                    <p class = "description">{{ list.description }}</p>
-                    <span class="date">{{ list.date }}</span>
+                    <p class = "description" v-if="list.description">{{ list.description }}</p>
+                    <span class="date" v-if="list.date">{{ list.date }}</span>
                     <a href="javascript:void(0)" class="btn" @click="add_watch_later(list); return false;" v-if="feed.title">
                         <span>watch later</span>
                     </a>
@@ -64,7 +64,6 @@
 </template>
 
 <script>
-const { shell } = require('electron');
 
 export default {
     created: function() {
@@ -127,32 +126,21 @@ export default {
     },
 
     methods: {
-        getdoubleDigestNumer(num) {
-            // 1桁の数を "0+n" にする
-            return ("0" + num).slice(-2)
-        },
-
         setDate(iso, channel, loop) {
-            // isoDateから表示形式を変更
-            let self = this;
-            let D = new Date(iso);
-            let month = self.getdoubleDigestNumer(D.getMonth() + 1);
-            let date = self.getdoubleDigestNumer(D.getDate());
-            let H = self.getdoubleDigestNumer(D.getHours());
-            let M = self.getdoubleDigestNumer(D.getMinutes());
-
-            let formatted = month + "/" + date + " " + H + ":" + M;
-            self.allFeed[channel].items[loop]["date"] = formatted;
-        },
-
-        setDescription(channel, loop) {
-            // tubeのみ
-            let self = this;
-            let desc = self.allFeed[channel].items[loop]["media:group"]["media:description"][0];
-            if (desc.length > 100){
-                desc = desc.substr(0, 100) + "...";
+            function getdoubleDigestNumer(num) {
+                // 1桁の数を "0+n" にする
+                return ("0" + num).slice(-2)
             }
-            self.allFeed[channel].items[loop]["description"] = desc;
+
+            // isoDateから表示形式を変更
+            let item = this.allFeed[channel].items[loop];
+            let D = new Date(iso);
+            let month = getdoubleDigestNumer(D.getMonth() + 1);
+            let date = getdoubleDigestNumer(D.getDate());
+            let H = getdoubleDigestNumer(D.getHours());
+            let M = getdoubleDigestNumer(D.getMinutes());
+
+            item["date"] = month + "/" + date + " " + H + ":" + M;
         },
 
         detectNew(channel) {
@@ -191,6 +179,11 @@ export default {
                     item: ["media:group"],
                 }
             });
+            const otherParser = new Parser({
+                customFields: {
+                    item: ["description"],
+                }
+            });
 
             for (let loop=0; loop<self.feedList.length; loop++) {
                 if (self.feedList[loop][1].match(/nicovideo/)) {     //nicoliveの場合
@@ -204,21 +197,19 @@ export default {
 
                         // 日付・description・thumbnail 整える
                         for(let j = 0; j < self.allFeed[self.feedList[loop][0]].items.length; j++) {
-                            //日付表示を整える
+                            //date format
                             self.setDate(self.allFeed[self.feedList[loop][0]].items[j].isoDate, self.feedList[loop][0], j);
-                            //description追加
-                            if (!("description" in self.allFeed[self.feedList[loop][0]].items[j])) {
-                                self.setDescription(self.feedList[loop][0], j);
+                            //description
+                            if (self.allFeed[self.feedList[loop][0]].items[j].description.length > 100) {
+                                self.allFeed[self.feedList[loop][0]].items[j].description = self.allFeed[self.feedList[loop][0]].items[j].description.substring(0, 100) + "...";
                             }
                             //thumbnail追加
-                            if (!("thumbnail" in self.allFeed[self.feedList[loop][0]].items[j])) {
-                                self.allFeed[self.feedList[loop][0]].items[j]["thumbnail"] = self.allFeed[self.feedList[loop][0]].items[j]["nicoch:live_thumbnail"];
-                            }
+                            self.allFeed[self.feedList[loop][0]].items[j]["thumbnail"] = self.allFeed[self.feedList[loop][0]].items[j]["nicoch:live_thumbnail"];
                         }
                         self.detectNew(self.feedList[loop][0]);
                     })();
 
-                }else if (self.feedList[loop][1].match(/youtube.com/)) {     //tubeの場合
+                } else if (self.feedList[loop][1].match(/youtube.com/)) {     //tubeの場合
                     (async () => {
                         //パース
                         let parsed = await tubeParser.parseURL(self.feedList[loop][1]);
@@ -229,15 +220,36 @@ export default {
 
                         // 日付・description・thumbnail 整える
                         for(let j = 0; j < self.allFeed[self.feedList[loop][0]].items.length; j++) {
-                            //日付表示を整える
+                            //date format
                             self.setDate(self.allFeed[self.feedList[loop][0]].items[j].isoDate, self.feedList[loop][0], j);
-                            //description追加
-                            if (!("description" in self.allFeed[self.feedList[loop][0]].items[j])) {
-                                self.setDescription(self.feedList[loop][0], j);
+                            //description
+                            if (self.allFeed[self.feedList[loop][0]].items[j]["media:group"]["media:description"][0].length > 100) {
+                                self.allFeed[self.feedList[loop][0]].items[j]["media:group"]["media:description"][0] = self.allFeed[self.feedList[loop][0]].items[j]["media:group"]["media:description"][0].substring(0, 100) + "...";
                             }
+                            self.allFeed[self.feedList[loop][0]].items[j].description = self.allFeed[self.feedList[loop][0]].items[j]["media:group"]["media:description"][0];
                             //thumbnail追加
-                            if (!("thumbnail" in self.allFeed[self.feedList[loop][0]].items[j])) {
-                                self.allFeed[self.feedList[loop][0]].items[j]["thumbnail"] = self.allFeed[self.feedList[loop][0]].items[j]["media:group"]["media:thumbnail"][0]["$"]["url"];
+                            self.allFeed[self.feedList[loop][0]].items[j]["thumbnail"] = self.allFeed[self.feedList[loop][0]].items[j]["media:group"]["media:thumbnail"][0]["$"]["url"];
+                        }
+                        self.detectNew(self.feedList[loop][0]);
+                    })();
+                } else {        //other feed
+                    (async () => {
+                        //パース
+                        let parsed = await otherParser.parseURL(self.feedList[loop][1]);
+                        parsed.items = parsed.items.slice(0, 8);
+                        //追加
+                        self.allFeed[self.feedList[loop][0]] = parsed;
+                        self.allFeed[self.feedList[loop][0]]["channelNickname"] = self.feedList[loop][0];
+
+                        // 日付・description・thumbnail 整える
+                        for(let j = 0; j < self.allFeed[self.feedList[loop][0]].items.length; j++) {
+                            //date format
+                            self.setDate(self.allFeed[self.feedList[loop][0]].items[j].isoDate, self.feedList[loop][0], j);
+                            //description
+                            if (self.allFeed[self.feedList[loop][0]].items[j].description) {
+                                if (self.allFeed[self.feedList[loop][0]].items[j].description.length > 100) {
+                                    self.allFeed[self.feedList[loop][0]].items[j].description = self.allFeed[self.feedList[loop][0]].items[j].description.substring(0, 100) + "...";
+                                }
                             }
                         }
                         self.detectNew(self.feedList[loop][0]);
@@ -291,7 +303,7 @@ export default {
 
         //リンクをブラウザで開く
         openPage(url) {
-            shell.openExternal(url);
+            require('electron').shell.openExternal(url);
         },
 
         //変数listに任意の動画のjsonを追加
