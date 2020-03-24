@@ -17,7 +17,7 @@
 ## How to Add Feed
 - feedを管理するファイルの場所
     - windowsの場合
-        - `:%homepath%\\Documents\\.feedList.csv`
+        - `:%homepath%\Documents\.feedList.csv`
     - macの場合
         - `$HOME/Documents/.feedList.csv`
 - フォーマット
