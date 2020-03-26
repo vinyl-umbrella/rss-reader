@@ -101,6 +101,7 @@ export default {
         }
 
         this.getAll();
+        setTimeout(this.eachFeed, 1500, 'default');
         // 5分ごとにfeedを更新
         setInterval(this.getAll, 300000);
     },
@@ -258,7 +259,6 @@ export default {
                 }
             }
 
-            setTimeout(self.eachFeed, 1500, 'default');
         },
 
 
