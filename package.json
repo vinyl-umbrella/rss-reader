@@ -14,7 +14,7 @@
   "main": "background.js",
   "dependencies": {
     "core-js": "^3.6.4",
-    "electron": "^8.1.1",
+    "electron": "^8.2.0",
     "rss-parser": "^3.7.6",
     "vue": "^2.6.11"
   },
