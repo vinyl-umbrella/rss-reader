@@ -100,7 +100,7 @@ export default {
 
         // localStorageに watch_later_list が存在すれば取ってくる
         if (localStorage.getItem('watch_later_list')) {
-            this.later = JSON.parse(localStorage.getItem('watch_later_list'));
+            this.later.items = JSON.parse(localStorage.getItem('watch_later_list'));
         }
         // localStorageに newestList が存在すれば取ってくる
         if (localStorage.getItem('newestList')) {
