@@ -24,6 +24,7 @@
     - チャンネルのタイトル,feedのurl
         - youtubeの場合: `https://www.youtube.com/feeds/videos.xml?channel_id=?????`
         - ニコニコの場合: `https://ch.nicovideo.jp/?????/live?rss=2.0`
+    - .feedList.csv内の空行はサイドバーでも空行となる
 
 
 ## How to Install

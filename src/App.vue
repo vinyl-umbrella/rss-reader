@@ -9,8 +9,8 @@
                     watch later
                 </a></li>
                 <br />
-
                 <div v-for="(channel, index) in feedList" :key="index">
+                    <br v-if="blankLine.indexOf(index) >= 0"/>
                     <li><a href="#" class="btn" @click="eachFeed(channel[0])">
                         <span style="color:#00aaaa;" v-if="channelColorFlag[channel[0]] === 1">
                             {{ channel[0] }}
@@ -19,7 +19,6 @@
                             {{ channel[0] }}
                         </span>
                     </a></li>
-                    <br v-if="index===5"/>
                 </div>
 
             </ul>
@@ -70,7 +69,7 @@ export default {
         const fs = require('fs');
         const file_path = require('os').homedir() + '/Documents/.feedList.csv';
         const default_text = 'jun channel,https://www.youtube.com/feeds/videos.xml?channel_id=UCx1nAvtVDIsaGmCMSe8ofsQ\nUNKちゃんねる,https://ch.nicovideo.jp/unkchanel/live?rss=2.0\n切り抜き,https://www.youtube.com/feeds/videos.xml?channel_id=UCH-lygWpHodDff3iQurnWnQ\n';
-        let temp = '';
+        let feedArray = '';
         try {
             fs.statSync(file_path);
         } catch(err) {
@@ -81,15 +80,23 @@ export default {
                 console.log('file read error');
             }
         }
-        temp = fs.readFileSync(file_path, 'utf-8');
-        temp = temp.split('\n');
-        if (temp[temp.length - 1].length === 0) {
-            temp.pop();
-        }
-        for (let loop=0; loop<temp.length; loop++) {
-            temp[loop] = temp[loop].split(',');
-        }
-        this.feedList = temp;
+        feedArray = fs.readFileSync(file_path, 'utf-8');
+        feedArray = feedArray.split('\n');
+        let blank = [];
+
+        feedArray.forEach(function(v, i){
+            if(v === ''){
+                blank.push(i-blank.length);
+            }
+        })
+        this.blankLine = blank;
+
+        feedArray = feedArray.filter(n => n !== '');
+
+        feedArray.forEach(function(v, i){
+            feedArray[i] = feedArray[i].split(',')
+        });
+        this.feedList = feedArray;
 
         // localStorageに watch_later_list が存在すれば取ってくる
         if (localStorage.getItem('watch_later_list')) {
@@ -101,7 +108,6 @@ export default {
         }
 
         this.getAll();
-        setTimeout(this.eachFeed, 1500, 'default');
         // 5分ごとにfeedを更新
         setInterval(this.getAll, 300000);
     },
@@ -123,19 +129,19 @@ export default {
             channelColorFlag: {},
             //それぞれの名前とxmlへのurl
             feedList: [],
+            blankLine: [],
         }
     },
 
     methods: {
-        setDate(iso, channel, loop) {
+        setDate(item) {
             function getdoubleDigestNumer(num) {
                 // 1桁の数を "0+n" にする
                 return ("0" + num).slice(-2)
             }
 
             // isoDateから表示形式を変更
-            let item = this.allFeed[channel].items[loop];
-            let D = new Date(iso);
+            let D = new Date(item.isoDate);
             let month = getdoubleDigestNumer(D.getMonth() + 1);
             let date = getdoubleDigestNumer(D.getDate());
             let H = getdoubleDigestNumer(D.getHours());
@@ -159,7 +165,7 @@ export default {
                     timeout: 4000,
                 });
                 notif.onclick = () => {
-                  self.add_watch_later("watch later", self.allFeed[channel].items[0]);
+                  self.add_watch_later(self.allFeed[channel].items[0]);
                 }
             }
         },
@@ -186,79 +192,77 @@ export default {
                 }
             });
 
-            for (let loop=0; loop<self.feedList.length; loop++) {
-                if (self.feedList[loop][1].match(/nicovideo/)) {     //nicoliveの場合
+            self.feedList.forEach(function(v){
+                if (v[1].match(/nicovideo/)) {     //nicoliveの場合
                     (async () => {
                         //パース
-                        let parsed = await nicoParser.parseURL(self.feedList[loop][1]);
+                        let parsed = await nicoParser.parseURL(v[1]);
                         parsed.items = parsed.items.slice(0, 8);
                         //追加
-                        self.allFeed[self.feedList[loop][0]] = parsed;
-                        self.allFeed[self.feedList[loop][0]]["channelNickname"] = self.feedList[loop][0];
+                        self.allFeed[v[0]] = parsed;
+                        self.allFeed[v[0]]["channelNickname"] = v[0];
 
                         // 日付・description・thumbnail 整える
-                        for(let j = 0; j < self.allFeed[self.feedList[loop][0]].items.length; j++) {
-                            //date format
-                            self.setDate(self.allFeed[self.feedList[loop][0]].items[j].isoDate, self.feedList[loop][0], j);
+                        self.allFeed[v[0]].items.forEach(function(item){
+                            self.setDate(item);
                             //description
-                            if (self.allFeed[self.feedList[loop][0]].items[j].description.length > 100) {
-                                self.allFeed[self.feedList[loop][0]].items[j].description = self.allFeed[self.feedList[loop][0]].items[j].description.substring(0, 100) + "...";
+                            if (item.description.length > 100) {
+                                item.description = item.description.substring(0, 100) + "...";
                             }
                             //thumbnail追加
-                            self.allFeed[self.feedList[loop][0]].items[j]["thumbnail"] = self.allFeed[self.feedList[loop][0]].items[j]["nicoch:live_thumbnail"];
-                        }
-                        self.detectNew(self.feedList[loop][0]);
+                            item["thumbnail"] = item["nicoch:live_thumbnail"];
+                        })
+                        self.detectNew(v[0]);
                     })();
 
-                } else if (self.feedList[loop][1].match(/youtube.com/)) {     //tubeの場合
+                } else if (v[1].match(/youtube.com/)) {     //tubeの場合
                     (async () => {
                         //パース
-                        let parsed = await tubeParser.parseURL(self.feedList[loop][1]);
+                        let parsed = await tubeParser.parseURL(v[1]);
                         parsed.items = parsed.items.slice(0, 8);
                         //追加
-                        self.allFeed[self.feedList[loop][0]] = parsed;
-                        self.allFeed[self.feedList[loop][0]]["channelNickname"] = self.feedList[loop][0];
+                        self.allFeed[v[0]] = parsed;
+                        self.allFeed[v[0]]["channelNickname"] = v[0];
 
                         // 日付・description・thumbnail 整える
-                        for(let j = 0; j < self.allFeed[self.feedList[loop][0]].items.length; j++) {
-                            //date format
-                            self.setDate(self.allFeed[self.feedList[loop][0]].items[j].isoDate, self.feedList[loop][0], j);
+                        self.allFeed[v[0]].items.forEach(function(item){
+                            self.setDate(item);
                             //description
-                            if (self.allFeed[self.feedList[loop][0]].items[j]["media:group"]["media:description"][0].length > 100) {
-                                self.allFeed[self.feedList[loop][0]].items[j]["media:group"]["media:description"][0] = self.allFeed[self.feedList[loop][0]].items[j]["media:group"]["media:description"][0].substring(0, 100) + "...";
+                            if (item["media:group"]["media:description"][0].length > 100) {
+                                item["media:group"]["media:description"][0] = item["media:group"]["media:description"][0].substring(0, 100) + "...";
                             }
-                            self.allFeed[self.feedList[loop][0]].items[j].description = self.allFeed[self.feedList[loop][0]].items[j]["media:group"]["media:description"][0];
+                            item.description = item["media:group"]["media:description"][0];
                             //thumbnail追加
-                            self.allFeed[self.feedList[loop][0]].items[j]["thumbnail"] = self.allFeed[self.feedList[loop][0]].items[j]["media:group"]["media:thumbnail"][0]["$"]["url"];
-                        }
-                        self.detectNew(self.feedList[loop][0]);
+                            item["thumbnail"] = item["media:group"]["media:thumbnail"][0]["$"]["url"];
+                        })
+                        self.detectNew(v[0]);
                     })();
                 } else {        //other feed
                     (async () => {
                         //パース
-                        let parsed = await otherParser.parseURL(self.feedList[loop][1]);
+                        let parsed = await otherParser.parseURL(v[1]);
                         parsed.items = parsed.items.slice(0, 8);
                         //追加
-                        self.allFeed[self.feedList[loop][0]] = parsed;
-                        self.allFeed[self.feedList[loop][0]]["channelNickname"] = self.feedList[loop][0];
+                        self.allFeed[v[0]] = parsed;
+                        self.allFeed[v[0]]["channelNickname"] = v[0];
 
                         // 日付・description・thumbnail 整える
-                        for(let j = 0; j < self.allFeed[self.feedList[loop][0]].items.length; j++) {
-                            //date format
-                            self.setDate(self.allFeed[self.feedList[loop][0]].items[j].isoDate, self.feedList[loop][0], j);
+                        self.allFeed[v[0]].items.forEach(function(item){
+                            self.setDate(item);
                             //description
-                            if (self.allFeed[self.feedList[loop][0]].items[j].description) {
-                                if (self.allFeed[self.feedList[loop][0]].items[j].description.length > 100) {
-                                    self.allFeed[self.feedList[loop][0]].items[j].description = self.allFeed[self.feedList[loop][0]].items[j].description.substring(0, 100) + "...";
+                            if (item.description) {
+                                if (item.description.length > 100) {
+                                    item.description = item.description.substring(0, 100) + "...";
                                 }
                             }
-                        }
-                        self.detectNew(self.feedList[loop][0]);
+                        })
+                        self.detectNew(v[0]);
                     })();
 
                 }
-            }
+            })
 
+            setTimeout(this.eachFeed, 1500, 'default');
         },
 
 
@@ -311,27 +315,27 @@ export default {
             let self = this;
             let notExist = new Boolean(true);
             //すでにlaterに存在するか判断
-            for(let i=0; i < self.later.items.length; i++) {
-                if (self.later.items[i] === list) {
+            self.later.items.forEach(function(v){
+                if (v === list) {
                     notExist = false;
                 }
-            }
+            })
             //存在しないなら追加，localStorageにも変更を反映
             if (notExist){
                 self.later.items.push(list);
-                localStorage.setItem('watch_later_list', JSON.stringify(self.later));
+                localStorage.setItem('watch_later_list', JSON.stringify(self.later.items));
             }
         },
 
         remove_watch_later(list) {
             let self = this;
             //laterから削除，localStorageにも変更を反映
-            for(let i=0; i<self.later.items.length; i++){
-                if (self.later.items[i] === list) {
+            self.later.items.forEach(function(v, i){
+                if (v === list) {
                     self.later.items.splice(i, 1);
                     localStorage.setItem('watch_later_list', JSON.stringify(self.later));
                 }
-            }
+            });
         },
 
         show_watch_later() {
