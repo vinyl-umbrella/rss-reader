@@ -2,7 +2,7 @@
     <div id="app">
         <div class="sidebar">
             <ul>
-                <li><a href="#" class="btn" @click="getAll" title="Ctrl + r">
+                <li><a href="#" class="btn" @click="getAll">
                     reload all
                 </a></li>
                 <li><a href="#" class="btn" @click="show_watch_later">
@@ -10,7 +10,7 @@
                 </a></li>
                 <br />
                 <div v-for="(channel, index) in feedList" :key="index">
-                    <br v-if="blankLine.indexOf(index) >= 0"/>
+                    <br v-show="blankLine.indexOf(index) >= 0"/>
                     <li><a href="#" class="btn" @click="eachFeed(channel[0])">
                         <span style="color:#00aaaa;" v-if="channelColorFlag[channel[0]] === 1">
                             {{ channel[0] }}
@@ -35,7 +35,7 @@
             </h1>
             <article v-for="(list, index) in feed.items" :key="index">
                 <figure>
-                    <img :src="list.thumbnail" v-if="list.thumbnail" />
+                    <img :src="list.thumbnail" v-show="list.thumbnail" />
                 </figure>
                 <div class="text_content">
                     <h2><a @click="openPage(list.link)">
@@ -46,8 +46,12 @@
                             {{ list.title }}
                         </span>
                     </a></h2>
-                    <p class = "description" v-if="list.description">{{ list.description }}</p>
-                    <span class="date" v-if="list.date">{{ list.date }}</span>
+                    <p class = "description" v-show="list.description">
+                        {{ list.description | shortenDescription }}
+                    </p>
+                    <span class="date" v-show="list.isoDate">
+                        {{ list.isoDate | formatDate }}
+                    </span>
                     <a href="javascript:void(0)" class="btn" @click="add_watch_later(list); return false;" v-if="feed.title">
                         <span>watch later</span>
                     </a>
@@ -133,28 +137,37 @@ export default {
         }
     },
 
-    methods: {
-        setDate(item) {
+    filters: {
+        formatDate(isoDate) {
             function getdoubleDigestNumer(num) {
                 // 1桁の数を "0+n" にする
                 return ("0" + num).slice(-2)
             }
 
-            // isoDateから表示形式を変更
-            let D = new Date(item.isoDate);
-            let month = getdoubleDigestNumer(D.getMonth() + 1);
-            let date = getdoubleDigestNumer(D.getDate());
-            let H = getdoubleDigestNumer(D.getHours());
-            let M = getdoubleDigestNumer(D.getMinutes());
+            // format
+            let iso = new Date(isoDate);
+            let month = getdoubleDigestNumer(iso.getMonth() + 1);
+            let date = getdoubleDigestNumer(iso.getDate());
+            let H = getdoubleDigestNumer(iso.getHours());
+            let M = getdoubleDigestNumer(iso.getMinutes());
 
-            item["date"] = month + "/" + date + " " + H + ":" + M;
+            return month + "/" + date + " " + H + ":" + M;
         },
+        shortenDescription(description) {
+            if (description.length > 100) {
+                return description = description.substring(0, 100) + "...";
+            } else {
+                return description
+            }
+        },
+    },
 
+    methods: {
         detectNew(channel) {
             let self = this;
             if (!(self.newest[channel])) {
                 self.channelColorFlag[channel] = 1;
-            } else if (self.newest[channel].date === self.allFeed[channel].items[0].date) {
+            } else if (self.newest[channel].isoDate === self.allFeed[channel].items[0].isoDate) {
                 // 新着なし
                 self.channelColorFlag[channel] = 0;
             } else {
@@ -202,13 +215,7 @@ export default {
                         self.allFeed[v[0]] = parsed;
                         self.allFeed[v[0]]["channelNickname"] = v[0];
 
-                        // 日付・description・thumbnail 整える
-                        self.allFeed[v[0]].items.forEach(function(item){
-                            self.setDate(item);
-                            //description
-                            if (item.description.length > 100) {
-                                item.description = item.description.substring(0, 100) + "...";
-                            }
+                        self.allFeed[v[0]].items.forEach(function(item) {
                             //thumbnail追加
                             item["thumbnail"] = item["nicoch:live_thumbnail"];
                         })
@@ -224,13 +231,7 @@ export default {
                         self.allFeed[v[0]] = parsed;
                         self.allFeed[v[0]]["channelNickname"] = v[0];
 
-                        // 日付・description・thumbnail 整える
-                        self.allFeed[v[0]].items.forEach(function(item){
-                            self.setDate(item);
-                            //description
-                            if (item["media:group"]["media:description"][0].length > 100) {
-                                item["media:group"]["media:description"][0] = item["media:group"]["media:description"][0].substring(0, 100) + "...";
-                            }
+                        self.allFeed[v[0]].items.forEach(function(item) {
                             item.description = item["media:group"]["media:description"][0];
                             //thumbnail追加
                             item["thumbnail"] = item["media:group"]["media:thumbnail"][0]["$"]["url"];
@@ -246,23 +247,13 @@ export default {
                         self.allFeed[v[0]] = parsed;
                         self.allFeed[v[0]]["channelNickname"] = v[0];
 
-                        // 日付・description・thumbnail 整える
-                        self.allFeed[v[0]].items.forEach(function(item){
-                            self.setDate(item);
-                            //description
-                            if (item.description) {
-                                if (item.description.length > 100) {
-                                    item.description = item.description.substring(0, 100) + "...";
-                                }
-                            }
-                        })
                         self.detectNew(v[0]);
                     })();
 
                 }
             })
 
-            setTimeout(this.eachFeed, 1500, 'default');
+            setTimeout(this.eachFeed, 2000, 'default');
         },
 
 
@@ -276,7 +267,7 @@ export default {
                         continue;
                     }
                     // 新着feed検知
-                    if (self.newest[channel].date === self.allFeed[channel].items[newFeedindex].date){
+                    if (self.newest[channel].isoDate === self.allFeed[channel].items[newFeedindex].isoDate){
                         break;
                     }
                 }
@@ -289,7 +280,7 @@ export default {
                         continue;
                     }
                     // 新着feed検知
-                    if (self.newest[channel].date === self.allFeed[channel].items[newFeedindex].date){
+                    if (self.newest[channel].isoDate === self.allFeed[channel].items[newFeedindex].isoDate){
                         break;
                     }
                 }
