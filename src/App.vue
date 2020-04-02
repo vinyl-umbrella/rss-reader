@@ -2,6 +2,9 @@
     <div id="app">
         <div class="sidebar">
             <ul>
+                <li><a href="#" class="btn" @click="showAll">
+                    All Items
+                </a></li>
                 <li><a href="#" class="btn" @click="getAll">
                     reload all
                 </a></li>
@@ -26,11 +29,11 @@
 
         <div class="body">
             <h1 class="pageTitle">
-                <a @click="openPage(feed.link)" v-if="feed.channelNickname">
+                <a @click="openPage(feed.link)" v-if="feed.link">
                     {{ feed.channelNickname }}
                 </a>
                 <div v-else>
-                    watch later
+                    {{feed.channelNickname}}
                 </div>
             </h1>
             <article v-for="(list, index) in feed.items" :key="index">
@@ -60,7 +63,6 @@
                     </a>
                 </div>
             </article>
-            <br />
         </div>
 
     </div>
@@ -72,7 +74,7 @@ export default {
     created: function() {
         const fs = require('fs');
         const file_path = require('os').homedir() + '/Documents/.feedList.csv';
-        const default_text = 'jun channel,https://www.youtube.com/feeds/videos.xml?channel_id=UCx1nAvtVDIsaGmCMSe8ofsQ\nUNKちゃんねる,https://ch.nicovideo.jp/unkchanel/live?rss=2.0\n切り抜き,https://www.youtube.com/feeds/videos.xml?channel_id=UCH-lygWpHodDff3iQurnWnQ\n';
+        const default_text = 'jun channel,https://www.youtube.com/feeds/videos.xml?channel_id=UCx1nAvtVDIsaGmCMSe8ofsQ\nUNKちゃんねる,https://ch.nicovideo.jp/unkchanel/live?rss=2.0\n';
         let feedArray = '';
         try {
             fs.statSync(file_path);
@@ -125,6 +127,7 @@ export default {
             // watch later のリスト
             later: {
                 "items": [],
+                "channelNickname": "watch later",
             },
             // それぞれのチャンネルの最新のfeedのリスト
             newest: {},
@@ -163,11 +166,31 @@ export default {
     },
 
     methods: {
+        showAll() {
+            let self = this;
+            let test = {
+                "items": [],
+                "channelNickname": "All Items",
+            };
+            self.feedList.forEach(function(ch){
+                self.allFeed[ch[0]].items.forEach(function(v){
+                    test.items.push(v);
+                })
+            })
+            test.items.sort(function(a,b){
+                if (a.isoDate>b.isoDate) return -1;
+                if (a.isoDate<b.isoDate) return 1;
+                return 0
+            });
+            test.items = test.items.slice(0, 15);
+            self.feed = test;
+        },
+
         detectNew(channel) {
             let self = this;
             if (!(self.newest[channel])) {
                 self.channelColorFlag[channel] = 1;
-            } else if (self.newest[channel].isoDate === self.allFeed[channel].items[0].isoDate) {
+            } else if (self.newest[channel].isoDate >= self.allFeed[channel].items[0].isoDate) {
                 // 新着なし
                 self.channelColorFlag[channel] = 0;
             } else {
@@ -234,6 +257,9 @@ export default {
                         self.allFeed[v[0]].items.forEach(function(item) {
                             item.description = item["media:group"]["media:description"][0];
                             //thumbnail追加
+                            if (item["media:group"]["media:thumbnail"][0]["$"]["url"].match(/hqdefault.jpg/)) {
+                                item["media:group"]["media:thumbnail"][0]["$"]["url"] = item["media:group"]["media:thumbnail"][0]["$"]["url"].replace(/hqdefault.jpg/, 'mqdefault.jpg');
+                            }
                             item["thumbnail"] = item["media:group"]["media:thumbnail"][0]["$"]["url"];
                         })
                         self.detectNew(v[0]);
@@ -253,7 +279,7 @@ export default {
                 }
             })
 
-            setTimeout(this.eachFeed, 2000, 'default');
+            setTimeout(self.showAll, 2000);
         },
 
 
@@ -293,7 +319,7 @@ export default {
                 localStorage.setItem('newestList', JSON.stringify(self.newest));
             }
 
-            self.feed = this.allFeed[channel];
+            self.feed = self.allFeed[channel];
         },
 
         //リンクをブラウザで開く
@@ -338,6 +364,37 @@ export default {
 </script>
 
 <style>
+    .sidebar {
+        height: 100vh;
+        width: 200px;
+        position: fixed;
+        top: 0;
+        left: 0;
+        background-color: #333;
+        color: #ccc;
+    }
+
+    .body {
+        position: relative;
+        margin-left: 200px;
+        margin-right: 2px;
+        background-color: #555;
+    }
+
+    .btn {
+        display: inline-block;
+        padding: 0.1em 0.5em;
+        margin-bottom: 2px;
+        background: #555;
+        color: #fff;
+        border-bottom: solid 4px #444;
+        border-radius: 2px;
+    }
+    .btn:active {
+        background: #444;
+        color: #ddd;
+    }
+
     ul {
         list-style: none;
         padding-left: 15px;
@@ -353,87 +410,6 @@ export default {
         text-decoration: underline;
     }
 
-    article {
-        display: flex;
-        margin-bottom: 10px;
-        padding-bottom: 10px;
-        border-radius: 4px;
-        box-sizing: border-box;
-        box-shadow: 0 0 5px #777;
-        background-color: #333;
-    }
-    article figure {
-        margin-block-start: 30px;
-        margin-block-end: 15px;
-        margin-inline-start: 40px;
-        margin-inline-end: 30px;
-    }
-    article figure img {
-        height: 150px;
-        vertical-align: middle;
-    }
-
-    h1 {
-        margin-block-start: 15px;
-        margin-block-end: 15px;
-    }
-    h2 {
-        margin-block-end: 5px;
-    }
-    p.description {
-        margin-block-start: 5px;
-    }
-    .text_content a.btn {
-        margin-left: 150px;
-    }
-
-    .sidebar {
-        height: 100vh;
-        width: 200px;
-        position: fixed;
-        top: 0;
-        left: 0;
-        background-color: #333;
-        color: #ccc;
-        border-right: solid 1px #777;
-    }
-
-    .body {
-        position: relative;
-        margin-left: 200px;
-        margin-right: 2px;
-        background-color: #555;
-    }
-
-    .pageTitle {
-        text-align: center;
-        color: #ddd;
-        background: #333;
-        padding: 0.4em;
-        border-top: solid 3px black;
-        border-bottom: solid 3px black;
-        border-radius: 5px;
-    }
-
-    .text_content {
-        margin-right: 10px;
-        color: #ccc;
-    }
-
-    .btn {
-        display: inline-block;
-        padding: 0.1em 0.5em;
-        margin-bottom: 2px;
-        background: #555;
-        color: #FFF;
-        border-bottom: solid 4px #444;
-        border-radius: 2px;
-    }
-    .btn:active {
-        background: #444;
-        color: #DDD;
-    }
-
     li a.btn {
         transition: font-size 300ms;
     }
@@ -442,11 +418,54 @@ export default {
         font-size: 115%;
     }
 
+    .pageTitle {
+        text-align: center;
+        color: #ddd;
+        background: #333;
+        padding: 0.4em;
+        border-top: solid 2px black;
+        border-bottom: solid 2px black;
+        border-radius: 5px;
+        margin-block-start: 0px;
+        margin-block-end: 15px;
+    }
+
+    article {
+        display: flex;
+        margin-bottom: 10px;
+        padding-bottom: 5px;
+        border-radius: 4px;
+        box-shadow: 0 0 5px #777;
+        background-color: #333;
+    }
+    article figure {
+        margin-block-start: 28px;
+        margin-inline-start: 25px;
+        margin-inline-end: 20px;
+    }
+    article figure img {
+        max-height: 120px;
+        max-width: 200px;
+        vertical-align: middle;
+    }
+
+    .text_content {
+        margin-right: 10px;
+    }
+
+    .text_content h2 {
+        margin-block-end: 5px;
+        color: #ccc;
+    }
+    .description {
+        margin-block-start: 0px;
+        color: #888;
+        padding-bottom: 10px;
+    }
     .date {
         color: #999;
     }
-    .description {
-        color: #888;
-        padding-bottom: 20px;
+    .text_content .btn {
+        margin-left: 150px;
     }
 </style>
