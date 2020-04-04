@@ -5,9 +5,6 @@
                 <li><a href="#" class="btn" @click="showAll">
                     All Items
                 </a></li>
-                <li><a href="#" class="btn" @click="getAll">
-                    reload all
-                </a></li>
                 <li><a href="#" class="btn" @click="show_watch_later">
                     watch later
                 </a></li>
@@ -37,8 +34,8 @@
                 </div>
             </h1>
             <article v-for="(list, index) in feed.items" :key="index">
-                <figure>
-                    <img :src="list.thumbnail" v-show="list.thumbnail" />
+                <figure v-show="list.thumbnail">
+                    <img :src="list.thumbnail"/>
                 </figure>
                 <div class="text_content">
                     <h2><a @click="openPage(list.link)">
@@ -55,11 +52,11 @@
                     <span class="date" v-show="list.isoDate">
                         {{ list.isoDate | formatDate }}
                     </span>
-                    <a href="javascript:void(0)" class="btn" @click="add_watch_later(list); return false;" v-if="feed.title">
-                        <span>watch later</span>
-                    </a>
-                    <a href="javascript:void(0)" class="btn" @click="remove_watch_later(list); return false;" v-else>
+                    <a href="javascript:void(0)" class="btn" @click="remove_watch_later(list); return false;" v-if="feed.channelNickname === 'watch later'">
                         <span>remove</span>
+                    </a>
+                    <a href="javascript:void(0)" class="btn" @click="add_watch_later(list); return false;" v-else>
+                        <span>watch later</span>
                     </a>
                 </div>
             </article>
@@ -442,11 +439,12 @@ export default {
         margin-block-start: 28px;
         margin-inline-start: 25px;
         margin-inline-end: 20px;
+        min-width: 200px;
+        text-align: center;
     }
     article figure img {
         max-height: 120px;
         max-width: 200px;
-        vertical-align: middle;
     }
 
     .text_content {
