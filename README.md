@@ -1,7 +1,7 @@
 # rss-reader
 
 ## sample image
-<img src="./img/sample.png" width="480px">
+<img src="./img/sample-win.png" width="480px">
 
 
 ## Features
@@ -33,13 +33,15 @@
 npm install
 npm run electron:build
 ```
-dist_electron内にあるインストーラを実行
+ビルド後，dist_electron内にあるインストーラを実行
 
 
 ## To do
 - All itemsにおける 新規feedの色付け機能
 - アプリアイコン作成(mac, linux)
 - windowサイズの記憶
+- 複数インスタンスの起動を禁止
+- アプリ内からfeedlistを管理
 
 ## License
 MIT
