@@ -181,6 +181,7 @@ export default {
             });
             test.items = test.items.slice(0, 15);
             self.feed = test;
+            self.NewFeedindex = 0;
         },
 
         detectNew(channel) {
@@ -290,7 +291,7 @@ export default {
                         continue;
                     }
                     // 新着feed検知
-                    if (self.newest[channel].isoDate === self.allFeed[channel].items[newFeedindex].isoDate){
+                    if (self.newest[channel].isoDate <= self.allFeed[channel].items[newFeedindex].isoDate){
                         break;
                     }
                 }
@@ -303,7 +304,7 @@ export default {
                         continue;
                     }
                     // 新着feed検知
-                    if (self.newest[channel].isoDate === self.allFeed[channel].items[newFeedindex].isoDate){
+                    if (self.newest[channel].isoDate <= self.allFeed[channel].items[newFeedindex].isoDate){
                         break;
                     }
                 }
