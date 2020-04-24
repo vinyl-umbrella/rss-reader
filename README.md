@@ -37,7 +37,7 @@ dist_electron内にあるインストーラを実行
 
 
 ## To do
-- All itemsのページにて新規feedの色の確認
+- All itemsにおける 新規feedの色付け機能
 - アプリアイコン作成(mac, linux)
 - windowサイズの記憶
 
