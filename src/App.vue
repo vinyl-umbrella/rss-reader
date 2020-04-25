@@ -34,9 +34,12 @@
                 </div>
             </h1>
             <article v-for="(list, index) in feed.items" :key="index">
-                <figure v-show="list.thumbnail">
+                <figure v-if="list.thumbnail">
                     <img :src="list.thumbnail"/>
                 </figure>
+                <div v-else>
+                    <span style="padding:10px;"> </span>
+                </div>
                 <div class="text_content">
                     <h2><a @click="openPage(list.link)">
                         <span style="color:#00aaaa;" v-if="NewFeedindex>index">
@@ -291,7 +294,7 @@ export default {
                         continue;
                     }
                     // 新着feed検知
-                    if (self.newest[channel].isoDate <= self.allFeed[channel].items[newFeedindex].isoDate){
+                    if (self.newest[channel].isoDate >= self.allFeed[channel].items[newFeedindex].isoDate){
                         break;
                     }
                 }
@@ -304,7 +307,7 @@ export default {
                         continue;
                     }
                     // 新着feed検知
-                    if (self.newest[channel].isoDate <= self.allFeed[channel].items[newFeedindex].isoDate){
+                    if (self.newest[channel].isoDate >= self.allFeed[channel].items[newFeedindex].isoDate){
                         break;
                     }
                 }
