@@ -190,6 +190,7 @@ export default {
         detectNew(channel) {
             let self = this;
             if (!(self.newest[channel])) {
+                // 初期値
                 self.channelColorFlag[channel] = 1;
             } else if (self.newest[channel].isoDate >= self.allFeed[channel].items[0].isoDate) {
                 // 新着なし
@@ -287,38 +288,28 @@ export default {
         eachFeed(channel) {
             let self = this;
             let newFeedindex = 0;
-            if (channel === 'default') {
-                channel = self.feedList[0][0];
-                for (;newFeedindex < self.allFeed[channel].items.length; newFeedindex++){
-                    if (!(self.newest[channel])) {
-                        continue;
-                    }
-                    // 新着feed検知
-                    if (self.newest[channel].isoDate >= self.allFeed[channel].items[newFeedindex].isoDate){
-                        break;
-                    }
-                }
-                self.NewFeedindex = newFeedindex;
-
-            } else {
-                for (;newFeedindex < self.allFeed[channel].items.length; newFeedindex++){
-                    // localStorageにそのチャンネルが存在しない
-                    if (!(self.newest[channel])) {
-                        continue;
-                    }
-                    // 新着feed検知
-                    if (self.newest[channel].isoDate >= self.allFeed[channel].items[newFeedindex].isoDate){
-                        break;
-                    }
-                }
-                if (newFeedindex === 0) {
-                    self.channelColorFlag[channel] = 0;
-                }
-                self.NewFeedindex = newFeedindex;
-                // newestを更新，localStorageにも変更を反映
-                self.newest[channel] = self.allFeed[channel].items[0];
-                localStorage.setItem('newestList', JSON.stringify(self.newest));
+            if (self.feed.channelNickname !== 'All Items' && self.feed.channelNickname !== 'watch later') {
+                console.log(self.feed.channelNickname);
+                self.channelColorFlag[self.feed.channelNickname] = 0
             }
+
+            for (;newFeedindex < self.allFeed[channel].items.length; newFeedindex++){
+                // localStorageにそのチャンネルが存在しない
+                if (!(self.newest[channel])) {
+                    continue;
+                }
+                // 新着feed検知
+                if (self.newest[channel].isoDate >= self.allFeed[channel].items[newFeedindex].isoDate){
+                    break;
+                }
+            }
+            if (newFeedindex === 0) {
+                self.channelColorFlag[channel] = 0;
+            }
+            self.NewFeedindex = newFeedindex;
+            // newestを更新，localStorageにも変更を反映
+            self.newest[channel] = self.allFeed[channel].items[0];
+            localStorage.setItem('newestList', JSON.stringify(self.newest));
 
             self.feed = self.allFeed[channel];
         },
