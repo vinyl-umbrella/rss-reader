@@ -5,7 +5,7 @@
                 <li><a href="#" class="btn" @click="showAll">
                     All Items
                 </a></li>
-                <li><a href="#" class="btn" @click="show_watch_later">
+                <li><a href="#" class="btn" @click="showWatchLater">
                     watch later
                 </a></li>
                 <br />
@@ -55,10 +55,10 @@
                     <span class="date" v-show="list.isoDate">
                         {{ list.isoDate | formatDate }}
                     </span>
-                    <a href="javascript:void(0)" class="btn" @click="remove_watch_later(list); return false;" v-if="feed.channelNickname === 'watch later'">
+                    <a href="javascript:void(0)" class="btn" @click="removeWatchLater(list); return false;" v-if="feed.channelNickname === 'watch later'">
                         <span>remove</span>
                     </a>
-                    <a href="javascript:void(0)" class="btn" @click="add_watch_later(list); return false;" v-else>
+                    <a href="javascript:void(0)" class="btn" @click="addWatchLater(list); return false;" v-else>
                         <span>watch later</span>
                     </a>
                 </div>
@@ -73,20 +73,20 @@
 export default {
     created: function() {
         const fs = require('fs');
-        const file_path = require('os').homedir() + '/Documents/.feedList.csv';
-        const default_text = 'jun channel,http://www.youtube.com/feeds/videos.xml?channel_id=UCx1nAvtVDIsaGmCMSe8ofsQ\nUNKちゃんねる,http://ch.nicovideo.jp/unkchanel/live?rss=2.0\n';
+        const filePath = require('os').homedir() + '/Documents/.feedList.csv';
+        const defaultText = 'jun channel,http://www.youtube.com/feeds/videos.xml?channel_id=UCx1nAvtVDIsaGmCMSe8ofsQ\nUNKちゃんねる,http://ch.nicovideo.jp/unkchanel/live?rss=2.0\n';
         let feedArray = '';
         try {
-            fs.statSync(file_path);
+            fs.statSync(filePath);
         } catch(err) {
             // 設定ファイルが存在しない場合
             if (err.code === 'ENOENT') {
-                fs.writeFileSync(file_path, default_text);
+                fs.writeFileSync(filePath, defaultText);
             } else {
                 console.log('file read error');
             }
         }
-        feedArray = fs.readFileSync(file_path, 'utf-8');
+        feedArray = fs.readFileSync(filePath, 'utf-8');
         feedArray = feedArray.split('\n');
         let blank = [];
 
@@ -142,17 +142,17 @@ export default {
 
     filters: {
         formatDate(isoDate) {
-            function getdoubleDigestNumer(num) {
+            function getDoubleDigestNumber(num) {
                 // 1桁の数を "0+n" にする
                 return ("0" + num).slice(-2)
             }
 
             // format
             let iso = new Date(isoDate);
-            let month = getdoubleDigestNumer(iso.getMonth() + 1);
-            let date = getdoubleDigestNumer(iso.getDate());
-            let H = getdoubleDigestNumer(iso.getHours());
-            let M = getdoubleDigestNumer(iso.getMinutes());
+            let month = getDoubleDigestNumber(iso.getMonth() + 1);
+            let date = getDoubleDigestNumber(iso.getDate());
+            let H = getDoubleDigestNumber(iso.getHours());
+            let M = getDoubleDigestNumber(iso.getMinutes());
 
             return month + "/" + date + " " + H + ":" + M;
         },
@@ -203,7 +203,7 @@ export default {
                     timeout: 4000,
                 });
                 notif.onclick = () => {
-                  self.add_watch_later(self.allFeed[channel].items[0]);
+                  self.addWatchLater(self.allFeed[channel].items[0]);
                 }
             }
         },
@@ -224,6 +224,11 @@ export default {
                     item: ["media:group"],
                 }
             });
+            const twitchParser = new Parser({
+                customFields: {
+                    item: ["description"]
+                }
+            })
             const otherParser = new Parser({
                 customFields: {
                     item: ["description"],
@@ -266,6 +271,24 @@ export default {
                         })
                         self.detectNew(v[0]);
                     })();
+                } else if (v[1].match(/twitchrss.appspot.com/)) {
+                    (async () => {
+                        //パース
+                        let parsed = await twitchParser.parseURL(v[1]);
+                        parsed.items = parsed.items.slice(0, 8);
+                        //追加
+                        self.allFeed[v[0]] = parsed;
+                        self.allFeed[v[0]]["channelNickname"] = v[0];
+
+                        self.allFeed[v[0]].items.forEach(function(item) {
+                            //thumbnail追加
+                            item["thumbnail"] = item["description"].slice(item["description"].lastIndexOf('img')+9, item["description"].lastIndexOf('jpg')+3)
+
+                            item["description"] = item["description"].slice(item["description"].lastIndexOf('>')+1, -1);
+                        })
+                        self.detectNew(v[0]);
+                    })();
+
                 } else {        //other feed
                     (async () => {
                         //パース
@@ -320,7 +343,7 @@ export default {
         },
 
         //変数listに任意の動画のjsonを追加
-        add_watch_later(list) {
+        addWatchLater(list) {
             let self = this;
             let notExist = new Boolean(true);
             //すでにlaterに存在するか判断
@@ -336,7 +359,7 @@ export default {
             }
         },
 
-        remove_watch_later(list) {
+        removeWatchLater(list) {
             let self = this;
             //laterから削除，localStorageにも変更を反映
             self.later.items.forEach(function(v, i){
@@ -347,7 +370,7 @@ export default {
             });
         },
 
-        show_watch_later() {
+        showWatchLater() {
             this.feed = this.later;
         }
     }
