@@ -74,7 +74,7 @@ export default {
     created: function() {
         const fs = require('fs');
         const file_path = require('os').homedir() + '/Documents/.feedList.csv';
-        const default_text = 'jun channel,https://www.youtube.com/feeds/videos.xml?channel_id=UCx1nAvtVDIsaGmCMSe8ofsQ\nUNKちゃんねる,https://ch.nicovideo.jp/unkchanel/live?rss=2.0\n';
+        const default_text = 'jun channel,http://www.youtube.com/feeds/videos.xml?channel_id=UCx1nAvtVDIsaGmCMSe8ofsQ\nUNKちゃんねる,http://ch.nicovideo.jp/unkchanel/live?rss=2.0\n';
         let feedArray = '';
         try {
             fs.statSync(file_path);
@@ -281,7 +281,7 @@ export default {
                 }
             })
 
-            setTimeout(self.showAll, 2000);
+            setTimeout(self.showAll, 1500);
         },
 
 
