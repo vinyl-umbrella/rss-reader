@@ -148,13 +148,23 @@ export default {
             }
 
             // format
+            let now = new Date();
             let iso = new Date(isoDate);
             let month = getDoubleDigestNumber(iso.getMonth() + 1);
             let date = getDoubleDigestNumber(iso.getDate());
             let H = getDoubleDigestNumber(iso.getHours());
             let M = getDoubleDigestNumber(iso.getMinutes());
 
-            return month + "/" + date + " " + H + ":" + M;
+
+            if ((now - iso) / 3600000 < 1) {
+                // 1時間以内
+                return month + "/" + date + " " + H + ":" + M + "　" + Math.floor((now - iso) / 60000) + "分前";
+            } else if ((now - iso) / 3600000 < 24) {
+                // 24時間以内
+                return month + "/" + date + " " + H + ":" + M + "　" + Math.floor((now - iso) / 3600000) + "時間前";
+            } else {
+                return month + "/" + date + " " + H + ":" + M + "　" + Math.floor((now - iso) / 86400000) + "日前";
+            }
         },
         shortenDescription(description) {
             if (description.length > 100) {
@@ -312,7 +322,6 @@ export default {
             let self = this;
             let newFeedindex = 0;
             if (self.feed.channelNickname !== 'All Items' && self.feed.channelNickname !== 'watch later') {
-                console.log(self.feed.channelNickname);
                 self.channelColorFlag[self.feed.channelNickname] = 0
             }
 
