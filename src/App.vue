@@ -403,6 +403,7 @@ export default {
         margin-left: 200px;
         margin-right: 2px;
         background-color: #555;
+        word-break:break-all;
     }
 
     .btn {
@@ -491,6 +492,6 @@ export default {
         color: #999;
     }
     .text_content .btn {
-        margin-left: 150px;
+        float: right;
     }
 </style>
