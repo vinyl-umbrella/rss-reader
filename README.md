@@ -22,9 +22,7 @@
     - macの場合
         - `$HOME/Documents/.feedList.csv`
 - フォーマット
-    - チャンネルのタイトル,feedのurl
-        - youtubeの場合: `https://www.youtube.com/feeds/videos.xml?channel_id=?????`
-        - ニコニコの場合: `https://ch.nicovideo.jp/?????/live?rss=2.0`
+    - `feed_name,feed_url`
     - .feedList.csv内の空行はサイドバーでも空行となる
 
 
@@ -38,7 +36,6 @@ npm run electron:build
 
 ## To do
 - All itemsにおける 新規feedの色付け機能
-- アプリアイコン作成(mac, linux)
 - windowサイズの記憶
 - 複数インスタンスの起動を禁止
 - アプリ内からfeedlistを管理
