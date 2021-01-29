@@ -229,16 +229,16 @@ export default {
                     item: ["description", "nicoch:live_thumbnail"],
                 }
             });
+            // const nicoComuParser = new Parser({
+            //     customFields: {
+            //         item: ["description"],
+            //     }
+            // })
             const tubeParser = new Parser({
                 customFields: {
                     item: ["media:group"],
                 }
             });
-            const twitchParser = new Parser({
-                customFields: {
-                    item: ["description"]
-                }
-            })
             const otherParser = new Parser({
                 customFields: {
                     item: ["description"],
@@ -246,7 +246,7 @@ export default {
             });
 
             self.feedList.forEach(function(v){
-                if (v[1].match(/nicovideo/)) {     //nicoliveの場合
+                if (v[1].match(/ch.nicovideo/)) {     //nicoliveの場合
                     (async () => {
                         //パース
                         let parsed = await nicoParser.parseURL(v[1]);
@@ -262,6 +262,22 @@ export default {
                         self.detectNew(v[0]);
                     })();
 
+                // } else if (v[1].match(/com.nicovideo/)) {     //コミュ放送
+                //     (async () => {
+                //         //パース
+                //         let parsed = await nicoComuParser.parseURL(v[1]);
+                //         console.log(parsed);
+                //         parsed.items = parsed.items.slice(0, 8);
+                //         //追加
+                //         self.allFeed[v[0]] = parsed;
+                //         self.allFeed[v[0]]["channelNickname"] = v[0];
+
+                //         // self.allFeed[v[0]].items.forEach(function(item) {
+                //         //     //thumbnail追加
+                //         //     item["thumbnail"] = item["nicoch:live_thumbnail"];
+                //         // })
+                //         self.detectNew(v[0]);
+                //     })();
                 } else if (v[1].match(/youtube.com/)) {     //tubeの場合
                     (async () => {
                         //パース
@@ -281,24 +297,6 @@ export default {
                         })
                         self.detectNew(v[0]);
                     })();
-                } else if (v[1].match(/twitchrss.appspot.com/)) {
-                    (async () => {
-                        //パース
-                        let parsed = await twitchParser.parseURL(v[1]);
-                        parsed.items = parsed.items.slice(0, 8);
-                        //追加
-                        self.allFeed[v[0]] = parsed;
-                        self.allFeed[v[0]]["channelNickname"] = v[0];
-
-                        self.allFeed[v[0]].items.forEach(function(item) {
-                            //thumbnail追加
-                            item["thumbnail"] = item["description"].slice(item["description"].lastIndexOf('img')+9, item["description"].lastIndexOf('jpg')+3)
-
-                            item["description"] = item["description"].slice(item["description"].lastIndexOf('>')+1, -1);
-                        })
-                        self.detectNew(v[0]);
-                    })();
-
                 } else {        //other feed
                     (async () => {
                         //パース
